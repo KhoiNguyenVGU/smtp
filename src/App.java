@@ -1,16 +1,9 @@
-import java.io.*;
-import java.net.Socket;
-import java.nio.file.Files;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.*;
-import java.security.cert.X509Certificate;
-
 public class App {
-    private static final String SMTP_SERVER = "smtp.gmail.com"; // Replace with your SMTP server
-    private static final int SMTP_PORT = 587; // Common SMTP port
     private static final int MAX_RETRIES = 3; // Maximum number of retries
     private static final long RETRY_DELAY = 60000; // Delay between retries in milliseconds (1 minute)
 
@@ -90,7 +83,7 @@ public class App {
             try {
                 attempt++;
                 System.out.println("Attempt " + attempt + " to send the email...");
-                sendEmail(username, password, recipients, subject, content.toString(), files, scanner);
+                EmailSender.sendEmail(username, password, recipients, subject, content.toString(), files);
                 success = true;
                 System.out.println("Email sent successfully!");
             } catch (Exception e) {
@@ -109,128 +102,24 @@ public class App {
             }
         }
 
-        scanner.close();
-    }
-
-    private static void sendEmail(String username, String password, List<String> recipients, String subject, String content, List<File> files, Scanner scanner) throws Exception {
-        // Disable certificate validation (for testing purposes only)
-        SSLContext sc = disableCertificateValidation();
-
-        // Create a socket connection to the SMTP server
-        Socket socket = new Socket(SMTP_SERVER, SMTP_PORT);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-
-        // Read server greeting
-        System.out.println("Server: " + reader.readLine());
-
-        // HELO command
-        sendCommand(writer, reader, "HELO localhost");
-
-        // STARTTLS command
-        sendCommand(writer, reader, "STARTTLS");
-
-        // Upgrade to TLS
-        SSLSocketFactory sslSocketFactory = sc.getSocketFactory();
-        SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, SMTP_SERVER, SMTP_PORT, true);
-        sslSocket.startHandshake();
-
-        // Replace reader and writer with encrypted streams
-        BufferedReader tlsReader = new BufferedReader(new InputStreamReader(sslSocket.getInputStream()));
-        BufferedWriter tlsWriter = new BufferedWriter(new OutputStreamWriter(sslSocket.getOutputStream()));
-
-        // AUTH LOGIN command
-        sendCommand(tlsWriter, tlsReader, "AUTH LOGIN");
-        sendCommand(tlsWriter, tlsReader, Base64.getEncoder().encodeToString(username.getBytes())); // Send encoded username
-        sendCommand(tlsWriter, tlsReader, Base64.getEncoder().encodeToString(password.getBytes())); // Send encoded password
-
-        // MAIL FROM command
-        sendCommand(tlsWriter, tlsReader, "MAIL FROM:<" + username + ">");
-
-        // RCPT TO commands for all recipients
-        for (String recipient : recipients) {
-            sendCommand(tlsWriter, tlsReader, "RCPT TO:<" + recipient + ">");
-        }
-
-        // DATA command
-        sendCommand(tlsWriter, tlsReader, "DATA");
-
-        // MIME headers
-        String boundary = "----=_Part_" + System.currentTimeMillis();
-        tlsWriter.write("Subject: " + subject + "\r\n");
-        tlsWriter.write("From: " + username + "\r\n");
-        tlsWriter.write("To: " + String.join(", ", recipients) + "\r\n");
-        tlsWriter.write("MIME-Version: 1.0\r\n");
-        tlsWriter.write("Content-Type: multipart/mixed; boundary=\"" + boundary + "\"\r\n");
-        tlsWriter.write("\r\n");
-
-        // Email content
-        tlsWriter.write("--" + boundary + "\r\n");
-        tlsWriter.write("Content-Type: text/plain; charset=\"UTF-8\"\r\n");
-        tlsWriter.write("Content-Transfer-Encoding: 7bit\r\n");
-        tlsWriter.write("\r\n");
-        tlsWriter.write(content);
-        tlsWriter.write("\r\n");
-
-        // Attachments (if any)
-        for (File file : files) {
-            tlsWriter.write("--" + boundary + "\r\n");
-            tlsWriter.write("Content-Type: application/octet-stream; name=\"" + file.getName() + "\"\r\n");
-            tlsWriter.write("Content-Transfer-Encoding: base64\r\n");
-            tlsWriter.write("Content-Disposition: attachment; filename=\"" + file.getName() + "\"\r\n");
-            tlsWriter.write("\r\n");
-
-            // Encode file in Base64
-            byte[] fileBytes = Files.readAllBytes(file.toPath());
-            String encodedFile = Base64.getEncoder().encodeToString(fileBytes);
-            tlsWriter.write(encodedFile);
-            tlsWriter.write("\r\n");
-        }
-
-        // End of MIME message
-        tlsWriter.write("--" + boundary + "--\r\n");
-        tlsWriter.write(".\r\n"); // End of message
-        tlsWriter.flush();
-        System.out.println("Server: " + tlsReader.readLine());
-
-        // Wait for the user to enter the QUIT command
-        System.out.println("Type 'QUIT' to terminate the SMTP session:");
-        while (!scanner.nextLine().equalsIgnoreCase("QUIT")) {
-            System.out.println("Invalid command. Please type 'QUIT' to terminate the session.");
-        }
-
-        // QUIT command
-        sendCommand(tlsWriter, tlsReader, "QUIT");
-
-        // Close the socket
-        sslSocket.close();
-        socket.close();
-    }
-
-    private static void sendCommand(BufferedWriter writer, BufferedReader reader, String command) throws IOException {
-        writer.write(command + "\r\n");
-        writer.flush();
-        System.out.println("Client: " + command);
-        System.out.println("Server: " + reader.readLine());
-    }
-
-    private static SSLContext disableCertificateValidation() throws Exception {
-        TrustManager[] trustAllCerts = new TrustManager[]{
-            new X509TrustManager() {
-                public X509Certificate[] getAcceptedIssuers() {
-                    return null;
+        // Wait for the user to type "quit" before exiting
+        System.out.println("Type 'quit' to exit the program:");
+        while (true) {
+            String input = scanner.nextLine();
+            if (input.equalsIgnoreCase("quit")) {
+                System.out.println("Closing the SMTP session...");
+                try {
+                    EmailSender.sendQuitCommand();
+                } catch (Exception e) {
+                    System.out.println("Error while closing the SMTP session: " + e.getMessage());
                 }
-
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                }
-
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                }
+                System.out.println("Exiting the program. Goodbye!");
+                break;
+            } else {
+                System.out.println("Invalid input. Please type 'quit' to exit.");
             }
-        };
+        }
 
-        SSLContext sc = SSLContext.getInstance("TLS");
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        return sc;
+        scanner.close();
     }
 }
