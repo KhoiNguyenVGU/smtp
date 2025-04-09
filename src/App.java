@@ -102,8 +102,8 @@ public class App {
             }
         }
 
-        // Wait for the user to type "quit" before exiting
-        System.out.println("Type 'quit' to exit the program:");
+        // Wait for the user to type "QUIT" before exiting
+        System.out.println("Type 'QUIT' to exit the program:");
         while (true) {
             String input = scanner.nextLine();
             if (input.equalsIgnoreCase("quit")) {
