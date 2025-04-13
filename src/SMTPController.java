@@ -1,7 +1,8 @@
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea; // Changed from TextField to TextArea
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -46,7 +47,10 @@ public class SMTPController {
     private TextField subjectField;
 
     @FXML
-    private TextArea contentArea; // Updated to match the FXML file
+    private TextArea contentArea;
+
+    @FXML
+    private ListView<String> attachedFilesListView; // ListView to display attached files
 
     private List<File> attachedFiles = new ArrayList<>();
     private static final int MAX_RETRIES = 3; // Maximum number of retries
@@ -68,6 +72,12 @@ public class SMTPController {
         List<File> selectedFiles = fileChooser.showOpenMultipleDialog(new Stage());
         if (selectedFiles != null) {
             attachedFiles.addAll(selectedFiles);
+
+            // Update the ListView with the names of the attached files
+            for (File file : selectedFiles) {
+                attachedFilesListView.getItems().add(file.getName());
+            }
+
             System.out.println("Files attached: " + selectedFiles);
         }
     }

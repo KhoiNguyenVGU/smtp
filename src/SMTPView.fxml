@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="SMTPController" prefHeight="450" prefWidth="600">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="SMTPController" prefHeight="500" prefWidth="600">
     <children>
         <Label text="SMTP Email Sender" layoutX="20" layoutY="20">
             <font>
@@ -32,7 +32,11 @@
         <Label text="Schedule Time (yyyy-MM-dd HH:mm:ss):" layoutX="20" layoutY="380" fx:id="scheduleTimeLabel" visible="false"/>
         <TextField fx:id="scheduleTimeField" layoutX="250" layoutY="380" prefWidth="300" visible="false"/>
         
-        <Button text="Send Email" layoutX="150" layoutY="420" onAction="#handleSendEmail"/>
-        <Button text="Attach Files" layoutX="250" layoutY="420" onAction="#handleAttachFiles"/>
+        <Button text="Send Email" layoutX="150" layoutY="460" onAction="#handleSendEmail"/>
+        <Button text="Attach Files" layoutX="250" layoutY="460" onAction="#handleAttachFiles"/>
+        
+        <!-- New Section for Attached Files -->
+        <Label text="Attached Files:" layoutX="20" layoutY="500"/>
+        <ListView fx:id="attachedFilesListView" layoutX="150" layoutY="500" prefWidth="400" prefHeight="100"/>
     </children>
 </AnchorPane>
