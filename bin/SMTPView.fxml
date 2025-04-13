@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="SMTPController" prefHeight="450" prefWidth="600">
+    <children>
+        <Label text="SMTP Email Sender" layoutX="20" layoutY="20">
+            <font>
+                <Font size="24"/>
+            </font>
+        </Label>
+        
+        <Label text="Sender's Email:" layoutX="20" layoutY="60"/>
+        <TextField fx:id="emailField" layoutX="150" layoutY="60" prefWidth="400"/>
+        
+        <Label text="App Password:" layoutX="20" layoutY="100"/>
+        <PasswordField fx:id="passwordField" layoutX="150" layoutY="100" prefWidth="400"/>
+        
+        <Label text="Recipients (comma separated):" layoutX="20" layoutY="140"/>
+        <TextField fx:id="recipientsField" layoutX="150" layoutY="140" prefWidth="400"/>
+        
+        <Label text="Subject:" layoutX="20" layoutY="180"/>
+        <TextField fx:id="subjectField" layoutX="150" layoutY="180" prefWidth="400"/>
+        
+        <Label text="Email Content:" layoutX="20" layoutY="220"/>
+        <TextArea fx:id="contentArea" layoutX="150" layoutY="220" prefWidth="400" prefHeight="100"/>
+        
+        <CheckBox text="Schedule Email" layoutX="20" layoutY="340" fx:id="scheduleCheckBox"/>
+        
+        <Label text="Schedule Time (yyyy-MM-dd HH:mm:ss):" layoutX="20" layoutY="380" fx:id="scheduleTimeLabel" visible="false"/>
+        <TextField fx:id="scheduleTimeField" layoutX="250" layoutY="380" prefWidth="300" visible="false"/>
+        
+        <Button text="Send Email" layoutX="150" layoutY="420" onAction="#handleSendEmail"/>
+        <Button text="Attach Files" layoutX="250" layoutY="420" onAction="#handleAttachFiles"/>
+    </children>
+</AnchorPane>
