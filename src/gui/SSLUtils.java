@@ -1,3 +1,5 @@
+package gui;
+
 import javax.net.ssl.*;
 import java.security.cert.X509Certificate;
 

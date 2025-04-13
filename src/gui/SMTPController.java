@@ -1,3 +1,5 @@
+package gui;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -123,12 +125,21 @@ public class SMTPController {
                 // Retry logic
                 int attempt = 0;
                 boolean success = false;
+                BufferedWriter tlsWriter = null;
+                BufferedReader tlsReader = null;
+                SSLSocket sslSocket = null;
+                Socket socket = null;
 
                 while (attempt < MAX_RETRIES && !success) {
                     try {
                         attempt++;
                         System.out.println("Attempt " + attempt + " to send the email...");
-                        sendEmail(username, password, recipients, subject, content, attachedFiles);
+                        // Call sendEmail and retrieve the SMTP session resources
+                        Map<String, Object> smtpResources = sendEmailAndGetResources(username, password, recipients, subject, content, attachedFiles);
+                        tlsWriter = (BufferedWriter) smtpResources.get("tlsWriter");
+                        tlsReader = (BufferedReader) smtpResources.get("tlsReader");
+                        sslSocket = (SSLSocket) smtpResources.get("sslSocket");
+                        socket = (Socket) smtpResources.get("socket");
                         success = true;
                         System.out.println("Email sent successfully!");
                     } catch (Exception e) {
@@ -147,7 +158,11 @@ public class SMTPController {
 
                 if (success) {
                     // Show the "Email Sent Successfully" popup
-                    javafx.application.Platform.runLater(this::showSuccessPopup);
+                    BufferedWriter finalTlsWriter = tlsWriter;
+                    BufferedReader finalTlsReader = tlsReader;
+                    SSLSocket finalSslSocket = sslSocket;
+                    Socket finalSocket = socket;
+                    javafx.application.Platform.runLater(() -> showSuccessPopup(finalTlsWriter, finalTlsReader, finalSslSocket, finalSocket));
                 }
             } catch (Exception e) {
                 System.out.println("Failed to send email. Error: " + e.getMessage());
@@ -176,7 +191,7 @@ public class SMTPController {
         return popupStage;
     }
 
-    private void showSuccessPopup() {
+    private void showSuccessPopup(BufferedWriter tlsWriter, BufferedReader tlsReader, SSLSocket sslSocket, Socket socket) {
         // Create a new Stage for the popup
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
@@ -195,6 +210,15 @@ public class SMTPController {
         // Create the "Quit" button
         Button quitButton = new Button("Quit");
         quitButton.setOnAction(event -> {
+            try {
+                // Send the QUIT command and close the SMTP session
+                sendCommand(tlsWriter, tlsReader, "QUIT");
+                sslSocket.close();
+                socket.close();
+                System.out.println("SMTP session closed.");
+            } catch (Exception e) {
+                System.out.println("Failed to close SMTP session. Error: " + e.getMessage());
+            }
             popupStage.close(); // Close the popup
             javafx.application.Platform.exit(); // Gracefully exit the application
         });
@@ -210,7 +234,7 @@ public class SMTPController {
         popupStage.showAndWait();
     }
 
-    private void sendEmail(String username, String password, List<String> recipients, String subject, String content, List<File> files) throws Exception {
+    private Map<String, Object> sendEmailAndGetResources(String username, String password, List<String> recipients, String subject, String content, List<File> files) throws Exception {
         // Disable certificate validation (for testing purposes only)
         SSLContext sc = SSLUtils.disableCertificateValidation();
 
@@ -293,13 +317,13 @@ public class SMTPController {
         tlsWriter.flush();
         System.out.println("Server: " + tlsReader.readLine());
 
-        // QUIT command
-        sendCommand(tlsWriter, tlsReader, "QUIT");
-
-        // Close the socket
-        sslSocket.close();
-        socket.close();
-        System.out.println("SMTP session closed.");
+        // Return the SMTP session resources
+        Map<String, Object> smtpResources = new HashMap<>();
+        smtpResources.put("tlsWriter", tlsWriter);
+        smtpResources.put("tlsReader", tlsReader);
+        smtpResources.put("sslSocket", sslSocket);
+        smtpResources.put("socket", socket);
+        return smtpResources;
     }
 
     private void sendCommand(BufferedWriter writer, BufferedReader reader, String command) throws Exception {

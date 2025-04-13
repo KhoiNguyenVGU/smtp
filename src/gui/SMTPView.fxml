@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="SMTPController" prefHeight="600" prefWidth="600">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="gui.SMTPController" prefHeight="600" prefWidth="600">
     <children>
         <!-- Title -->
         <Label text="SMTP Email Sender" layoutX="20" layoutY="20">
