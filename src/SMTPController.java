@@ -6,6 +6,10 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -84,56 +88,125 @@ public class SMTPController {
 
     @FXML
     private void handleSendEmail() {
-        try {
-            // Retrieve input values
-            String username = emailField.getText();
-            String password = passwordField.getText();
-            String recipientsInput = recipientsField.getText();
-            String subject = subjectField.getText();
-            String content = contentArea.getText();
+        // Create and show the "Sending in process..." popup
+        Stage sendingPopup = createSendingPopup();
+        sendingPopup.show();
 
-            // Split recipients by commas
-            List<String> recipients = List.of(recipientsInput.split(","));
+        // Run the email sending process in a background thread
+        new Thread(() -> {
+            try {
+                // Retrieve input values
+                String username = emailField.getText();
+                String password = passwordField.getText();
+                String recipientsInput = recipientsField.getText();
+                String subject = subjectField.getText();
+                String content = contentArea.getText();
 
-            // Handle scheduling
-            if (scheduleCheckBox.isSelected()) {
-                String scheduledTime = scheduleTimeField.getText();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date scheduledDate = dateFormat.parse(scheduledTime);
-                long delay = scheduledDate.getTime() - System.currentTimeMillis();
+                // Split recipients by commas
+                List<String> recipients = List.of(recipientsInput.split(","));
 
-                if (delay > 0) {
-                    System.out.println("Email scheduled. Waiting to send...");
-                    TimeUnit.MILLISECONDS.sleep(delay);
-                } else {
-                    System.out.println("The scheduled time is in the past. Sending the email immediately.");
-                }
-            }
+                // Handle scheduling
+                if (scheduleCheckBox.isSelected()) {
+                    String scheduledTime = scheduleTimeField.getText();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date scheduledDate = dateFormat.parse(scheduledTime);
+                    long delay = scheduledDate.getTime() - System.currentTimeMillis();
 
-            // Retry logic
-            int attempt = 0;
-            boolean success = false;
-
-            while (attempt < MAX_RETRIES && !success) {
-                try {
-                    attempt++;
-                    System.out.println("Attempt " + attempt + " to send the email...");
-                    sendEmail(username, password, recipients, subject, content, attachedFiles);
-                    success = true;
-                    System.out.println("Email sent successfully!");
-                } catch (Exception e) {
-                    System.out.println("Failed to send email. Error: " + e.getMessage());
-                    if (attempt < MAX_RETRIES) {
-                        System.out.println("Retrying in 1 minute...");
-                        TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+                    if (delay > 0) {
+                        System.out.println("Email scheduled. Waiting to send...");
+                        TimeUnit.MILLISECONDS.sleep(delay);
                     } else {
-                        System.out.println("All retry attempts failed. Email not sent.");
+                        System.out.println("The scheduled time is in the past. Sending the email immediately.");
                     }
                 }
+
+                // Retry logic
+                int attempt = 0;
+                boolean success = false;
+
+                while (attempt < MAX_RETRIES && !success) {
+                    try {
+                        attempt++;
+                        System.out.println("Attempt " + attempt + " to send the email...");
+                        sendEmail(username, password, recipients, subject, content, attachedFiles);
+                        success = true;
+                        System.out.println("Email sent successfully!");
+                    } catch (Exception e) {
+                        System.out.println("Failed to send email. Error: " + e.getMessage());
+                        if (attempt < MAX_RETRIES) {
+                            System.out.println("Retrying in 1 minute...");
+                            TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+                        } else {
+                            System.out.println("All retry attempts failed. Email not sent.");
+                        }
+                    }
+                }
+
+                // Close the "Sending in process..." popup
+                javafx.application.Platform.runLater(sendingPopup::close);
+
+                if (success) {
+                    // Show the "Email Sent Successfully" popup
+                    javafx.application.Platform.runLater(this::showSuccessPopup);
+                }
+            } catch (Exception e) {
+                System.out.println("Failed to send email. Error: " + e.getMessage());
+                javafx.application.Platform.runLater(sendingPopup::close);
             }
-        } catch (Exception e) {
-            System.out.println("Failed to send email. Error: " + e.getMessage());
-        }
+        }).start();
+    }
+
+    private Stage createSendingPopup() {
+        // Create a new Stage for the "Sending in process..." popup
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Sending Email");
+
+        // Create a Label for the message
+        Label sendingLabel = new Label("Sending in process... Please wait.");
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.getChildren().add(sendingLabel);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        // Set the scene and return the popup stage
+        Scene scene = new Scene(layout, 300, 100);
+        popupStage.setScene(scene);
+        return popupStage;
+    }
+
+    private void showSuccessPopup() {
+        // Create a new Stage for the popup
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Email Sent Successfully");
+
+        // Create a Label for the success message
+        Label successLabel = new Label("The email was sent successfully!");
+
+        // Create the "Send New Email" button
+        Button sendNewEmailButton = new Button("Send New Email");
+        sendNewEmailButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup and allow the user to send a new email
+        });
+
+        // Create the "Quit" button
+        Button quitButton = new Button("Quit");
+        quitButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            System.exit(0); // Exit the application
+        });
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(successLabel, sendNewEmailButton, quitButton);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        // Set the scene and show the popup
+        Scene scene = new Scene(layout, 300, 150);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
     }
 
     private void sendEmail(String username, String password, List<String> recipients, String subject, String content, List<File> files) throws Exception {
