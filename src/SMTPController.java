@@ -188,14 +188,15 @@ public class SMTPController {
         // Create the "Send New Email" button
         Button sendNewEmailButton = new Button("Send New Email");
         sendNewEmailButton.setOnAction(event -> {
-            popupStage.close(); // Close the popup and allow the user to send a new email
+            popupStage.close(); // Close the popup
+            resetForm(); // Reset the form for a new email
         });
 
         // Create the "Quit" button
         Button quitButton = new Button("Quit");
         quitButton.setOnAction(event -> {
             popupStage.close(); // Close the popup
-            System.exit(0); // Exit the application
+            javafx.application.Platform.exit(); // Gracefully exit the application
         });
 
         // Arrange the components in a VBox
@@ -306,5 +307,24 @@ public class SMTPController {
         writer.flush();
         System.out.println("Client: " + command);
         System.out.println("Server: " + reader.readLine());
+    }
+
+    private void resetForm() {
+        // Clear all input fields
+        emailField.clear();
+        passwordField.clear();
+        recipientsField.clear();
+        subjectField.clear();
+        contentArea.clear();
+
+        // Clear the attached files list
+        attachedFiles.clear();
+        attachedFilesListView.getItems().clear();
+
+        // Reset the schedule checkbox and hide the schedule time fields
+        scheduleCheckBox.setSelected(false);
+        scheduleTimeLabel.setVisible(false);
+        scheduleTimeField.clear();
+        scheduleTimeField.setVisible(false);
     }
 }
