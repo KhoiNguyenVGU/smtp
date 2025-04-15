@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="gui.LoginController" prefHeight="300" prefWidth="400">
+    <children>
+        <!-- Title -->
+        <Label text="Login to SMTP Email Sender" layoutX="50" layoutY="20" style="-fx-font-size: 18;"/>
+
+        <!-- Email Field -->
+        <Label text="Email:" layoutX="50" layoutY="80"/>
+        <TextField fx:id="emailField" layoutX="150" layoutY="80" prefWidth="200"/>
+
+        <!-- Password Field -->
+        <Label text="App Password:" layoutX="50" layoutY="120"/>
+        <PasswordField fx:id="passwordField" layoutX="150" layoutY="120" prefWidth="200"/>
+
+        <!-- Login Button -->
+        <Button text="Login" layoutX="150" layoutY="180" onAction="#handleLogin"/>
+    </children>
+</AnchorPane>

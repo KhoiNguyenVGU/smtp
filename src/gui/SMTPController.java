@@ -2,6 +2,7 @@ package gui;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -59,6 +60,9 @@ public class SMTPController {
     @FXML
     private ListView<String> attachedFilesListView; // ListView to display attached files
 
+    private String userEmail;
+    private String userPassword;
+
     private List<File> attachedFiles = new ArrayList<>();
     private static final int MAX_RETRIES = 3; // Maximum number of retries
     private static final long RETRY_DELAY = 60000; // Delay between retries in milliseconds (1 minute)
@@ -70,6 +74,11 @@ public class SMTPController {
             scheduleTimeLabel.setVisible(newValue);
             scheduleTimeField.setVisible(newValue);
         });
+    }
+
+    public void setUserCredentials(String email, String password) {
+        this.userEmail = email;
+        this.userPassword = password;
     }
 
     @FXML
@@ -144,8 +153,8 @@ public class SMTPController {
         new Thread(() -> {
             try {
                 // Retrieve input values
-                String username = emailField.getText();
-                String password = passwordField.getText();
+                String username = userEmail; // Use userEmail instead of emailField
+                String password = userPassword; // Use userPassword instead of passwordField
                 String recipientsInput = recipientsField.getText();
                 String subject = subjectField.getText();
                 String content = contentArea.getText();
@@ -237,7 +246,7 @@ public class SMTPController {
         Button sendNewEmailButton = new Button("Send New Email");
         sendNewEmailButton.setOnAction(event -> {
             popupStage.close(); // Close the popup
-            resetForm(); // Reset the form for a new email
+            resetForm(); // Clear all previous input
         });
 
         // Create the "Quit" button
@@ -312,7 +321,7 @@ public class SMTPController {
         Button sendNewEmailButton = new Button("Send New Email");
         sendNewEmailButton.setOnAction(event -> {
             popupStage.close(); // Close the popup
-            resetForm(); // Reset the form for a new email
+            resetForm(); // Clear all previous input
         });
 
         // Create the "Quit" button
@@ -521,8 +530,6 @@ public class SMTPController {
 
     private void resetForm() {
         // Clear all input fields
-        emailField.clear();
-        passwordField.clear();
         recipientsField.clear();
         subjectField.clear();
         contentArea.clear();
@@ -608,5 +615,21 @@ public class SMTPController {
         Scene scene = new Scene(layout, 300, 150);
         popupStage.setScene(scene);
         popupStage.showAndWait();
+    }
+
+    @FXML
+    private void handleLogout() {
+        try {
+            // Load the login view
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/LoginView.fxml"));
+            Stage stage = (Stage) recipientsField.getScene().getWindow();
+            stage.setScene(new Scene(loader.load()));
+
+            // Reset the stage title
+            stage.setTitle("Login - SMTP Email Sender");
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

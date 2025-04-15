@@ -8,9 +8,9 @@ import javafx.stage.Stage;
 public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/SMTPView.fxml")); // Adjust path if needed
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/LoginView.fxml")); // Start with the login view
         primaryStage.setScene(new Scene(loader.load()));
-        primaryStage.setTitle("SMTP Email Sender");
+        primaryStage.setTitle("Login - SMTP Email Sender");
         primaryStage.show();
     }
 
