@@ -92,6 +92,9 @@ public class SMTPController {
     private void handleSendEmail() {
         // Create and show the "Sending in process..." popup
         Stage sendingPopup = createSendingPopup();
+        Label sendingLabel = new Label("Attempt 1: Sending in process... Please wait.");
+        VBox layout = (VBox) sendingPopup.getScene().getRoot();
+        layout.getChildren().add(0, sendingLabel); // Add the label at the top
         sendingPopup.show();
 
         // Run the email sending process in a background thread
@@ -124,49 +127,54 @@ public class SMTPController {
 
                 // Retry logic
                 int attempt = 0;
-                boolean success = false;
-                BufferedWriter tlsWriter = null;
-                BufferedReader tlsReader = null;
-                SSLSocket sslSocket = null;
-                Socket socket = null;
+                final boolean[] success = {false}; // Use a single-element array to hold the success value
+                Map<String, Object> smtpResources = new HashMap<>();
 
-                while (attempt < MAX_RETRIES && !success) {
+                while (attempt < MAX_RETRIES && !success[0]) {
                     try {
                         attempt++;
+                        int currentAttempt = attempt;
+                        javafx.application.Platform.runLater(() -> sendingLabel.setText("Attempt " + currentAttempt + ": Sending in process... Please wait."));
                         System.out.println("Attempt " + attempt + " to send the email...");
                         // Call sendEmail and retrieve the SMTP session resources
-                        Map<String, Object> smtpResources = sendEmailAndGetResources(username, password, recipients, subject, content, attachedFiles);
-                        tlsWriter = (BufferedWriter) smtpResources.get("tlsWriter");
-                        tlsReader = (BufferedReader) smtpResources.get("tlsReader");
-                        sslSocket = (SSLSocket) smtpResources.get("sslSocket");
-                        socket = (Socket) smtpResources.get("socket");
-                        success = true;
+                        smtpResources = sendEmailAndGetResources(username, password, recipients, subject, content, attachedFiles);
+                        success[0] = true; // Update the success value
                         System.out.println("Email sent successfully!");
                     } catch (Exception e) {
                         System.out.println("Failed to send email. Error: " + e.getMessage());
                         if (attempt < MAX_RETRIES) {
+                            int currentAttempt = attempt;
+                            javafx.application.Platform.runLater(() -> sendingLabel.setText("Attempt " + currentAttempt + " failed. Retrying in 1 minute..."));
                             System.out.println("Retrying in 1 minute...");
                             TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
                         } else {
                             System.out.println("All retry attempts failed. Email not sent.");
+                            javafx.application.Platform.runLater(() -> sendingLabel.setText("All attempts failed. Email not sent."));
                         }
                     }
                 }
 
                 // Close the "Sending in process..." popup
-                javafx.application.Platform.runLater(sendingPopup::close);
-
-                if (success) {
-                    // Show the "Email Sent Successfully" popup
-                    BufferedWriter finalTlsWriter = tlsWriter;
-                    BufferedReader finalTlsReader = tlsReader;
-                    SSLSocket finalSslSocket = sslSocket;
-                    Socket finalSocket = socket;
-                    javafx.application.Platform.runLater(() -> showSuccessPopup(finalTlsWriter, finalTlsReader, finalSslSocket, finalSocket));
-                }
+                Map<String, Object> finalSmtpResources = smtpResources;
+                javafx.application.Platform.runLater(() -> {
+                    sendingPopup.close();
+                    if (success[0]) {
+                        showSuccessPopup(
+                            (BufferedWriter) finalSmtpResources.get("tlsWriter"),
+                            (BufferedReader) finalSmtpResources.get("tlsReader"),
+                            (SSLSocket) finalSmtpResources.get("sslSocket"),
+                            (Socket) finalSmtpResources.get("socket")
+                        );
+                    } else {
+                        showFailurePopup(); // Show failure popup if all retries fail
+                    }
+                });
             } catch (Exception e) {
                 System.out.println("Failed to send email. Error: " + e.getMessage());
-                javafx.application.Platform.runLater(sendingPopup::close);
+                javafx.application.Platform.runLater(() -> {
+                    sendingPopup.close();
+                    showFailurePopup(); // Show failure popup if an exception occurs
+                });
             }
         }).start();
     }
@@ -177,16 +185,29 @@ public class SMTPController {
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Sending Email");
 
-        // Create a Label for the message
-        Label sendingLabel = new Label("Sending in process... Please wait.");
-
-        // Arrange the components in a VBox
+        // Create a VBox layout for dynamic updates
         VBox layout = new VBox(10);
-        layout.getChildren().add(sendingLabel);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
 
+        // Create the "Send New Email" button
+        Button sendNewEmailButton = new Button("Send New Email");
+        sendNewEmailButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            resetForm(); // Reset the form for a new email
+        });
+
+        // Create the "Quit" button
+        Button quitButton = new Button("Quit");
+        quitButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            javafx.application.Platform.exit(); // Gracefully exit the application
+        });
+
+        // Add buttons to the layout
+        layout.getChildren().addAll(sendNewEmailButton, quitButton);
+
         // Set the scene and return the popup stage
-        Scene scene = new Scene(layout, 300, 100);
+        Scene scene = new Scene(layout, 300, 150);
         popupStage.setScene(scene);
         return popupStage;
     }
@@ -226,6 +247,40 @@ public class SMTPController {
         // Arrange the components in a VBox
         VBox layout = new VBox(10);
         layout.getChildren().addAll(successLabel, sendNewEmailButton, quitButton);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        // Set the scene and show the popup
+        Scene scene = new Scene(layout, 300, 150);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
+    }
+
+    private void showFailurePopup() {
+        // Create a new Stage for the popup
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Email Sending Failed");
+
+        // Create a Label for the failure message
+        Label failureLabel = new Label("All attempts to send the email have failed.");
+
+        // Create the "Send New Email" button
+        Button sendNewEmailButton = new Button("Send New Email");
+        sendNewEmailButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            resetForm(); // Reset the form for a new email
+        });
+
+        // Create the "Quit" button
+        Button quitButton = new Button("Quit");
+        quitButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            javafx.application.Platform.exit(); // Gracefully exit the application
+        });
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(failureLabel, sendNewEmailButton, quitButton);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
 
         // Set the scene and show the popup
