@@ -1,5 +1,6 @@
 package gui;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -90,6 +91,48 @@ public class SMTPController {
 
     @FXML
     private void handleSendEmail() {
+        // Check if the schedule checkbox is selected
+        if (scheduleCheckBox.isSelected()) {
+            try {
+                // Parse the scheduled time
+                String scheduledTime = scheduleTimeField.getText();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date scheduledDate = dateFormat.parse(scheduledTime);
+
+                // Check if the scheduled time is in the past
+                if (scheduledDate.before(new Date())) {
+                    Platform.runLater(this::showInvalidScheduledTimePopup);
+                    return; // Exit the method to prevent sending the email
+                }
+
+                // Show a popup indicating the email is scheduled immediately after clicking "Send"
+                Platform.runLater(() -> showScheduledPopup(scheduledTime));
+
+                // Calculate the delay in milliseconds
+                long delay = scheduledDate.getTime() - System.currentTimeMillis();
+                System.out.println("Email scheduled. Waiting for " + delay + " milliseconds...");
+
+                // Run the delay and email-sending process in a background thread
+                new Thread(() -> {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(delay); // Wait until the scheduled time
+                        Platform.runLater(this::sendEmailProcess); // Call the email-sending process on the JavaFX Application Thread
+                    } catch (Exception e) {
+                        System.out.println("Error during scheduled email sending: " + e.getMessage());
+                        Platform.runLater(() -> showErrorPopup("Error", "Failed to send the scheduled email."));
+                    }
+                }).start();
+            } catch (Exception e) {
+                // Handle parsing errors (e.g., invalid date format)
+                Platform.runLater(() -> showErrorPopup("Invalid Date Format", "Please enter a valid date and time in the format: yyyy-MM-dd HH:mm:ss"));
+            }
+        } else {
+            // If not scheduled, send the email immediately
+            sendEmailProcess();
+        }
+    }
+
+    private void sendEmailProcess() {
         // Create and show the "Sending in process..." popup
         Stage sendingPopup = createSendingPopup();
         Label sendingLabel = new Label("Attempt 1: Sending in process... Please wait.");
@@ -110,21 +153,6 @@ public class SMTPController {
                 // Split recipients by commas
                 List<String> recipients = List.of(recipientsInput.split(","));
 
-                // Handle scheduling
-                if (scheduleCheckBox.isSelected()) {
-                    String scheduledTime = scheduleTimeField.getText();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date scheduledDate = dateFormat.parse(scheduledTime);
-                    long delay = scheduledDate.getTime() - System.currentTimeMillis();
-
-                    if (delay > 0) {
-                        System.out.println("Email scheduled. Waiting to send...");
-                        TimeUnit.MILLISECONDS.sleep(delay);
-                    } else {
-                        System.out.println("The scheduled time is in the past. Sending the email immediately.");
-                    }
-                }
-
                 // Retry logic
                 int attempt = 0;
                 final boolean[] success = {false}; // Use a single-element array to hold the success value
@@ -141,6 +169,22 @@ public class SMTPController {
                         success[0] = true; // Update the success value
                         System.out.println("Email sent successfully!");
                     } catch (Exception e) {
+                        if (e.getMessage().contains("Invalid credentials")) {
+                            System.out.println("Invalid credentials detected.");
+                            javafx.application.Platform.runLater(() -> {
+                                sendingPopup.close();
+                                showInvalidCredentialsPopup(); // Show popup for invalid credentials
+                            });
+                            return; // Exit the retry loop immediately
+                        }
+                        if (e.getMessage().contains("Invalid recipient")) {
+                            System.out.println("Invalid recipient detected.");
+                            javafx.application.Platform.runLater(() -> {
+                                sendingPopup.close();
+                                showInvalidRecipientPopup(e.getMessage()); // Show popup for invalid recipient
+                            });
+                            return; // Exit the retry loop immediately
+                        }
                         System.out.println("Failed to send email. Error: " + e.getMessage());
                         if (attempt < MAX_RETRIES) {
                             int currentAttempt = attempt;
@@ -289,6 +333,74 @@ public class SMTPController {
         popupStage.showAndWait();
     }
 
+    private void showInvalidCredentialsPopup() {
+        // Create a new Stage for the popup
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Invalid Credentials");
+
+        // Create a Label for the error message
+        Label errorLabel = new Label("The provided username or password is incorrect.");
+
+        // Create the "Try Again" button
+        Button tryAgainButton = new Button("Try Again");
+        tryAgainButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            resetForm(); // Reset the form for a new attempt
+        });
+
+        // Create the "Quit" button
+        Button quitButton = new Button("Quit");
+        quitButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            javafx.application.Platform.exit(); // Gracefully exit the application
+        });
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(errorLabel, tryAgainButton, quitButton);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        // Set the scene and show the popup
+        Scene scene = new Scene(layout, 300, 150);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
+    }
+
+    private void showInvalidRecipientPopup(String errorMessage) {
+        // Create a new Stage for the popup
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Invalid Recipient");
+
+        // Create a Label for the error message
+        Label errorLabel = new Label("The recipient address is invalid:\n" + errorMessage);
+
+        // Create the "Try Again" button
+        Button tryAgainButton = new Button("Try Again");
+        tryAgainButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            resetForm(); // Reset the form for a new attempt
+        });
+
+        // Create the "Quit" button
+        Button quitButton = new Button("Quit");
+        quitButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            javafx.application.Platform.exit(); // Gracefully exit the application
+        });
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(errorLabel, tryAgainButton, quitButton);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        // Set the scene and show the popup
+        Scene scene = new Scene(layout, 300, 150);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
+    }
+
     private Map<String, Object> sendEmailAndGetResources(String username, String password, List<String> recipients, String subject, String content, List<File> files) throws Exception {
         // Disable certificate validation (for testing purposes only)
         SSLContext sc = SSLUtils.disableCertificateValidation();
@@ -321,18 +433,29 @@ public class SMTPController {
         // AUTH LOGIN command
         sendCommand(tlsWriter, tlsReader, "AUTH LOGIN");
         sendCommand(tlsWriter, tlsReader, Base64.getEncoder().encodeToString(username.getBytes())); // Send encoded username
-        sendCommand(tlsWriter, tlsReader, Base64.getEncoder().encodeToString(password.getBytes())); // Send encoded password
+        String authResponse = sendCommand(tlsWriter, tlsReader, Base64.getEncoder().encodeToString(password.getBytes())); // Send encoded password
+
+        // Check for authentication errors
+        if (authResponse.startsWith("535") || authResponse.startsWith("530")) {
+            throw new Exception("Invalid credentials: " + authResponse);
+        }
 
         // MAIL FROM command
         sendCommand(tlsWriter, tlsReader, "MAIL FROM:<" + username + ">");
 
         // RCPT TO commands for all recipients
         for (String recipient : recipients) {
-            sendCommand(tlsWriter, tlsReader, "RCPT TO:<" + recipient + ">");
+            String rcptResponse = sendCommand(tlsWriter, tlsReader, "RCPT TO:<" + recipient + ">");
+            if (rcptResponse.startsWith("553")) {
+                throw new Exception("Invalid recipient: " + rcptResponse);
+            }
         }
 
         // DATA command
-        sendCommand(tlsWriter, tlsReader, "DATA");
+        String dataResponse = sendCommand(tlsWriter, tlsReader, "DATA");
+        if (!dataResponse.startsWith("354")) {
+            throw new Exception("Error during DATA command: " + dataResponse);
+        }
 
         // MIME headers
         String boundary = "----=_Part_" + System.currentTimeMillis();
@@ -370,7 +493,13 @@ public class SMTPController {
         tlsWriter.write("--" + boundary + "--\r\n");
         tlsWriter.write(".\r\n"); // End of message
         tlsWriter.flush();
-        System.out.println("Server: " + tlsReader.readLine());
+        String finalResponse = tlsReader.readLine();
+        System.out.println("Server: " + finalResponse);
+
+        // Check for errors in the final response
+        if (!finalResponse.startsWith("250")) {
+            throw new Exception("Error after sending email: " + finalResponse);
+        }
 
         // Return the SMTP session resources
         Map<String, Object> smtpResources = new HashMap<>();
@@ -381,11 +510,13 @@ public class SMTPController {
         return smtpResources;
     }
 
-    private void sendCommand(BufferedWriter writer, BufferedReader reader, String command) throws Exception {
+    private String sendCommand(BufferedWriter writer, BufferedReader reader, String command) throws Exception {
         writer.write(command + "\r\n");
         writer.flush();
         System.out.println("Client: " + command);
-        System.out.println("Server: " + reader.readLine());
+        String response = reader.readLine();
+        System.out.println("Server: " + response);
+        return response;
     }
 
     private void resetForm() {
@@ -405,5 +536,77 @@ public class SMTPController {
         scheduleTimeLabel.setVisible(false);
         scheduleTimeField.clear();
         scheduleTimeField.setVisible(false);
+    }
+
+    private void showInvalidScheduledTimePopup() {
+        // Create a new Stage for the popup
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Invalid Scheduled Time");
+
+        // Create a Label for the error message
+        Label errorLabel = new Label("The scheduled time is in the past. Please select a valid future time.");
+
+        // Create the "OK" button
+        Button okButton = new Button("OK");
+        okButton.setOnAction(event -> popupStage.close()); // Close the popup
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(errorLabel, okButton);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        // Set the scene and show the popup
+        Scene scene = new Scene(layout, 300, 150);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
+    }
+
+    private void showErrorPopup(String title, String message) {
+        // Create a new Stage for the popup
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle(title);
+
+        // Create a Label for the error message
+        Label errorLabel = new Label(message);
+
+        // Create the "OK" button
+        Button okButton = new Button("OK");
+        okButton.setOnAction(event -> popupStage.close()); // Close the popup
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(errorLabel, okButton);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        // Set the scene and show the popup
+        Scene scene = new Scene(layout, 300, 150);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
+    }
+
+    private void showScheduledPopup(String scheduledTime) {
+        // Create a new Stage for the popup
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Email Scheduled");
+
+        // Create a Label for the scheduled message
+        Label scheduledLabel = new Label("The email is scheduled to be sent at: " + scheduledTime);
+
+        // Create the "OK" button
+        Button okButton = new Button("OK");
+        okButton.setOnAction(event -> popupStage.close()); // Close the popup
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(scheduledLabel, okButton);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        // Set the scene and show the popup
+        Scene scene = new Scene(layout, 300, 150);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
     }
 }
