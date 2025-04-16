@@ -67,6 +67,9 @@ public class SMTPController {
     private static final int MAX_RETRIES = 3; // Maximum number of retries
     private static final long RETRY_DELAY = 60000; // Delay between retries in milliseconds (1 minute)
 
+    private Stage scheduledPopupStage; // Reference to the scheduled popup stage
+    private boolean isScheduled = true; // Flag to track if the email is scheduled
+
     @FXML
     public void initialize() {
         // Add a listener to the CheckBox to toggle visibility of schedule time fields
@@ -100,44 +103,54 @@ public class SMTPController {
 
     @FXML
     private void handleSendEmail() {
-        // Check if the schedule checkbox is selected
+        if (recipientsField.getText().trim().isEmpty()) {
+            showInvalidRecipientPopup("Recipient field cannot be empty.");
+            return;
+        }
+
+        if (subjectField.getText().trim().isEmpty()) {
+            // Show confirmation popup if the subject is empty
+            showEmptySubjectConfirmationPopup();
+            return;
+        }
+
         if (scheduleCheckBox.isSelected()) {
             try {
-                // Parse the scheduled time
                 String scheduledTime = scheduleTimeField.getText();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date scheduledDate = dateFormat.parse(scheduledTime);
 
-                // Check if the scheduled time is in the past
                 if (scheduledDate.before(new Date())) {
                     Platform.runLater(this::showInvalidScheduledTimePopup);
-                    return; // Exit the method to prevent sending the email
+                    return;
                 }
 
-                // Show a popup indicating the email is scheduled immediately after clicking "Send"
+                isScheduled = true; // Mark as scheduled
                 Platform.runLater(() -> showScheduledPopup(scheduledTime));
 
-                // Calculate the delay in milliseconds
                 long delay = scheduledDate.getTime() - System.currentTimeMillis();
-                System.out.println("Email scheduled. Waiting for " + delay + " milliseconds...");
-
-                // Run the delay and email-sending process in a background thread
                 new Thread(() -> {
                     try {
-                        TimeUnit.MILLISECONDS.sleep(delay); // Wait until the scheduled time
-                        Platform.runLater(this::sendEmailProcess); // Call the email-sending process on the JavaFX Application Thread
+                        Thread.sleep(delay);
+                        Platform.runLater(() -> {
+                            sendEmailProcess();
+                            isScheduled = false; // Reset the scheduled state after sending
+
+                            // Close the scheduled popup if it is still open
+                            if (scheduledPopupStage != null && scheduledPopupStage.isShowing()) {
+                                scheduledPopupStage.close();
+                            }
+                        });
                     } catch (Exception e) {
-                        System.out.println("Error during scheduled email sending: " + e.getMessage());
                         Platform.runLater(() -> showErrorPopup("Error", "Failed to send the scheduled email."));
                     }
                 }).start();
             } catch (Exception e) {
-                // Handle parsing errors (e.g., invalid date format)
                 Platform.runLater(() -> showErrorPopup("Invalid Date Format", "Please enter a valid date and time in the format: yyyy-MM-dd HH:mm:ss"));
             }
         } else {
-            // If not scheduled, send the email immediately
             sendEmailProcess();
+            isScheduled = false; // Reset the scheduled state for immediate sending
         }
     }
 
@@ -242,22 +255,12 @@ public class SMTPController {
         VBox layout = new VBox(10);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
 
-        // Create the "Send New Email" button
-        Button sendNewEmailButton = new Button("Send New Email");
-        sendNewEmailButton.setOnAction(event -> {
-            popupStage.close(); // Close the popup
-            resetForm(); // Clear all previous input
-        });
+        // Create a Label for the "Sending in process..." message
+        //Label sendingLabel = new Label("Sending in process... Please wait.");
+        //sendingLabel.setStyle("-fx-font-size: 14; -fx-text-alignment: center;");
 
-        // Create the "Quit" button
-        Button quitButton = new Button("Quit");
-        quitButton.setOnAction(event -> {
-            popupStage.close(); // Close the popup
-            javafx.application.Platform.exit(); // Gracefully exit the application
-        });
-
-        // Add buttons to the layout
-        layout.getChildren().addAll(sendNewEmailButton, quitButton);
+        // Add the label to the layout
+        //layout.getChildren().add(sendingLabel);
 
         // Set the scene and return the popup stage
         Scene scene = new Scene(layout, 300, 150);
@@ -385,27 +388,50 @@ public class SMTPController {
         // Create a Label for the error message
         Label errorLabel = new Label("The recipient address is invalid:\n" + errorMessage);
 
-        // Create the "Try Again" button
-        Button tryAgainButton = new Button("Try Again");
-        tryAgainButton.setOnAction(event -> {
-            popupStage.close(); // Close the popup
-            resetForm(); // Reset the form for a new attempt
-        });
-
-        // Create the "Quit" button
-        Button quitButton = new Button("Quit");
-        quitButton.setOnAction(event -> {
-            popupStage.close(); // Close the popup
-            javafx.application.Platform.exit(); // Gracefully exit the application
-        });
+        // Create the "OK" button
+        Button okButton = new Button("OK");
+        okButton.setOnAction(event -> popupStage.close()); // Close the popup
 
         // Arrange the components in a VBox
         VBox layout = new VBox(10);
-        layout.getChildren().addAll(errorLabel, tryAgainButton, quitButton);
+        layout.getChildren().addAll(errorLabel, okButton);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
 
         // Set the scene and show the popup
         Scene scene = new Scene(layout, 300, 150);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
+    }
+
+    private void showEmptySubjectConfirmationPopup() {
+        // Create a new Stage for the popup
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Empty Subject");
+
+        // Create a Label for the confirmation message
+        Label confirmationLabel = new Label("The subject field is empty. Do you want to send the email without a subject?");
+
+        // Create the "OK" button
+        Button okButton = new Button("OK");
+        okButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup
+            sendEmailProcess(); // Proceed with sending the email
+        });
+
+        // Create the "Cancel" button
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setOnAction(event -> {
+            popupStage.close(); // Close the popup without clearing the form
+        });
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(confirmationLabel, okButton, cancelButton);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        // Set the scene and show the popup
+        Scene scene = new Scene(layout, 400, 150);
         popupStage.setScene(scene);
         popupStage.showAndWait();
     }
@@ -529,20 +555,22 @@ public class SMTPController {
     }
 
     private void resetForm() {
-        // Clear all input fields
         recipientsField.clear();
         subjectField.clear();
         contentArea.clear();
-
-        // Clear the attached files list
         attachedFiles.clear();
         attachedFilesListView.getItems().clear();
-
-        // Reset the schedule checkbox and hide the schedule time fields
         scheduleCheckBox.setSelected(false);
         scheduleTimeLabel.setVisible(false);
         scheduleTimeField.clear();
         scheduleTimeField.setVisible(false);
+        isScheduled = false; // Reset the scheduled state
+
+        // Close the scheduled popup if it is still open
+        if (scheduledPopupStage != null && scheduledPopupStage.isShowing()) {
+            scheduledPopupStage.close();
+        }
+        scheduledPopupStage = null; // Reset the reference
     }
 
     private void showInvalidScheduledTimePopup() {
@@ -594,27 +622,30 @@ public class SMTPController {
     }
 
     private void showScheduledPopup(String scheduledTime) {
-        // Create a new Stage for the popup
-        Stage popupStage = new Stage();
-        popupStage.initModality(Modality.APPLICATION_MODAL);
-        popupStage.setTitle("Email Scheduled");
+        if (!isScheduled) {
+            return; // Do not show the popup if the email is no longer scheduled
+        }
 
-        // Create a Label for the scheduled message
+        scheduledPopupStage = new Stage(); // Store the popup stage reference
+        scheduledPopupStage.initModality(Modality.APPLICATION_MODAL);
+        scheduledPopupStage.setTitle("Email Scheduled");
+
         Label scheduledLabel = new Label("The email is scheduled to be sent at: " + scheduledTime);
 
-        // Create the "OK" button
-        Button okButton = new Button("OK");
-        okButton.setOnAction(event -> popupStage.close()); // Close the popup
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setOnAction(event -> {
+            scheduledPopupStage.close();
+            isScheduled = false; // Cancel the scheduled email
+            System.out.println("Scheduled email canceled.");
+        });
 
-        // Arrange the components in a VBox
         VBox layout = new VBox(10);
-        layout.getChildren().addAll(scheduledLabel, okButton);
+        layout.getChildren().addAll(scheduledLabel, cancelButton);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
 
-        // Set the scene and show the popup
         Scene scene = new Scene(layout, 300, 150);
-        popupStage.setScene(scene);
-        popupStage.showAndWait();
+        scheduledPopupStage.setScene(scene);
+        scheduledPopupStage.showAndWait();
     }
 
     @FXML
