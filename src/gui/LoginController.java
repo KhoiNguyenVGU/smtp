@@ -111,7 +111,6 @@ public class LoginController {
             }
 
             // Close the connection
-            sendCommand(writer, reader, "QUIT");
             sslSocket.close();
             socket.close();
 
