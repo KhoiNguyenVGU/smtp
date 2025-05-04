@@ -39,13 +39,13 @@ public class LoginController {
 
         // Run the login process in a background thread
         new Thread(() -> {
-            boolean isValid = validateCredentials(email, password);
+            LoginResult result = validateCredentials(email, password);
 
             // Close the "Logging in..." popup on the JavaFX Application Thread
             Platform.runLater(loggingInPopup::close);
 
-            if (isValid) {
-                Platform.runLater(() -> {
+            Platform.runLater(() -> {
+                if (result == LoginResult.SUCCESS) {
                     try {
                         // Load the main view
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/SMTPView.fxml"));
@@ -61,15 +61,20 @@ public class LoginController {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                });
-            } else {
-                // Show an error popup for invalid credentials
-                Platform.runLater(() -> showErrorPopup("Invalid Credentials", "The provided email or app password is incorrect."));
-            }
+                } else if (result == LoginResult.NO_INTERNET) {
+                    showErrorPopup("No Internet Connection", "Could not connect to the SMTP server. Please check your internet connection.");
+                } else {
+                    showErrorPopup("Invalid Credentials", "The provided email or app password is incorrect.");
+                }
+            });
         }).start();
     }
 
-    private boolean validateCredentials(String email, String password) {
+    private enum LoginResult {
+        SUCCESS, INVALID_CREDENTIALS, NO_INTERNET
+    }
+
+    private LoginResult validateCredentials(String email, String password) {
         try {
             // Connect to the SMTP server
             String SMTP_SERVER = "smtp.gmail.com";
@@ -107,17 +112,20 @@ public class LoginController {
             // Check for authentication errors
             if (authResponse.startsWith("535") || authResponse.startsWith("530")) {
                 System.out.println("Invalid credentials: " + authResponse);
-                return false; // Invalid credentials
+                return LoginResult.INVALID_CREDENTIALS;
             }
 
             // Close the connection
             sslSocket.close();
             socket.close();
 
-            return true; // Valid credentials
+            return LoginResult.SUCCESS;
+        } catch (java.io.IOException e) {
+            System.out.println("Network error: " + e.getMessage());
+            return LoginResult.NO_INTERNET;
         } catch (Exception e) {
             System.out.println("Error during credential validation: " + e.getMessage());
-            return false; // Invalid credentials
+            return LoginResult.INVALID_CREDENTIALS;
         }
     }
 
