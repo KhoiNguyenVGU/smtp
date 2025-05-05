@@ -18,7 +18,7 @@
         
         <!-- Recipients -->
         <Label text="Recipients (comma separated):" layoutX="20" layoutY="60"/>
-        <TextField fx:id="recipientsField" layoutX="150" layoutY="60" prefWidth="400"/>
+        <TextField fx:id="recipientsField" layoutX="220" layoutY="60" prefWidth="330"/>
         
         <!-- Subject -->
         <Label text="Subject:" layoutX="20" layoutY="100"/>

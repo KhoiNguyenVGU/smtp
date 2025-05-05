@@ -83,6 +83,12 @@ public class LoginController {
         String email = emailField.getText();
         String password = passwordField.getText();
 
+        // Check for internet connection before proceeding
+        if (!isInternetAvailable()) {
+            showErrorPopup("No Internet Connection", "Please check your internet connection and try again.");
+            return;
+        }
+
         // Create and show the "Logging in..." popup
         Stage loggingInPopup = createLoggingInPopup();
         loggingInPopup.show();
@@ -124,6 +130,16 @@ public class LoginController {
                 Platform.runLater(() -> showErrorPopup("Invalid Credentials", "The provided email or app password is incorrect."));
             }
         }).start();
+    }
+
+    // Add this method to check for internet connectivity
+    private boolean isInternetAvailable() {
+        try (Socket socket = new Socket()) {
+            socket.connect(new java.net.InetSocketAddress("8.8.8.8", 53), 1500);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private boolean validateCredentials(String email, String password) {
@@ -168,7 +184,6 @@ public class LoginController {
             }
 
             // Close the connection
-            sendCommand(writer, reader, "QUIT");
             sslSocket.close();
             socket.close();
 
