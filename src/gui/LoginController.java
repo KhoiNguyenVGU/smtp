@@ -2,6 +2,8 @@ package gui;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -15,10 +17,18 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.URI;
 import java.util.Base64;
+import java.awt.Desktop;
+import java.util.Properties;
+
 
 public class LoginController {
 
@@ -27,6 +37,46 @@ public class LoginController {
 
     @FXML
     private PasswordField passwordField;
+
+    @FXML
+    private CheckBox rememberMeCheckBox;
+    
+    @FXML
+    private Hyperlink forgotPasswordLink;
+    
+    @FXML
+    private void initialize() {
+        // Load saved credentials if available
+        loadSavedCredentials();
+    }
+    
+    @FXML
+    private void handleForgotPassword() {
+        // Check if the email field has content
+        String email = emailField.getText().trim();
+        
+        if (email.isEmpty()) {
+            showInfoPopup("Email Required", "Please enter your email address first.");
+            return;
+        }
+        
+        try {
+            // Open the Google App Password page
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI("https://myaccount.google.com/apppasswords"));
+                
+                // Show instructions popup
+                showAppPasswordInstructions();
+            } else {
+                showInfoPopup("Browser Unavailable", 
+                    "Could not open browser automatically. Please visit https://myaccount.google.com/apppasswords");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showInfoPopup("Error", 
+                "Could not open browser. Please visit https://myaccount.google.com/apppasswords manually.");
+        }
+    }
 
     @FXML
     private void handleLogin() {
@@ -39,13 +89,20 @@ public class LoginController {
 
         // Run the login process in a background thread
         new Thread(() -> {
-            LoginResult result = validateCredentials(email, password);
+            boolean isValid = validateCredentials(email, password);
 
             // Close the "Logging in..." popup on the JavaFX Application Thread
             Platform.runLater(loggingInPopup::close);
 
-            Platform.runLater(() -> {
-                if (result == LoginResult.SUCCESS) {
+            if (isValid) {
+                // Save credentials if "Remember Me" is selected
+                if (rememberMeCheckBox.isSelected()) {
+                    saveCredentials(email, password, true);
+                } else {
+                    clearSavedCredentials();
+                }
+
+                Platform.runLater(() -> {
                     try {
                         // Load the main view
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/SMTPView.fxml"));
@@ -61,20 +118,15 @@ public class LoginController {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                } else if (result == LoginResult.NO_INTERNET) {
-                    showErrorPopup("No Internet Connection", "Could not connect to the SMTP server. Please check your internet connection.");
-                } else {
-                    showErrorPopup("Invalid Credentials", "The provided email or app password is incorrect.");
-                }
-            });
+                });
+            } else {
+                // Show an error popup for invalid credentials
+                Platform.runLater(() -> showErrorPopup("Invalid Credentials", "The provided email or app password is incorrect."));
+            }
         }).start();
     }
 
-    private enum LoginResult {
-        SUCCESS, INVALID_CREDENTIALS, NO_INTERNET
-    }
-
-    private LoginResult validateCredentials(String email, String password) {
+    private boolean validateCredentials(String email, String password) {
         try {
             // Connect to the SMTP server
             String SMTP_SERVER = "smtp.gmail.com";
@@ -112,20 +164,18 @@ public class LoginController {
             // Check for authentication errors
             if (authResponse.startsWith("535") || authResponse.startsWith("530")) {
                 System.out.println("Invalid credentials: " + authResponse);
-                return LoginResult.INVALID_CREDENTIALS;
+                return false; // Invalid credentials
             }
 
             // Close the connection
+            sendCommand(writer, reader, "QUIT");
             sslSocket.close();
             socket.close();
 
-            return LoginResult.SUCCESS;
-        } catch (java.io.IOException e) {
-            System.out.println("Network error: " + e.getMessage());
-            return LoginResult.NO_INTERNET;
+            return true; // Valid credentials
         } catch (Exception e) {
             System.out.println("Error during credential validation: " + e.getMessage());
-            return LoginResult.INVALID_CREDENTIALS;
+            return false; // Invalid credentials
         }
     }
 
@@ -191,5 +241,102 @@ public class LoginController {
         // Set the scene and show the popup
         popupStage.setScene(new Scene(layout, 300, 150));
         popupStage.showAndWait();
+    }
+    
+    private void showInfoPopup(String title, String message) {
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle(title);
+
+        // Create a Label for the message
+        javafx.scene.control.Label messageLabel = new javafx.scene.control.Label(message);
+        messageLabel.setWrapText(true);
+
+        // Create the "OK" button
+        javafx.scene.control.Button okButton = new javafx.scene.control.Button("OK");
+        okButton.setOnAction(event -> popupStage.close());
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+        layout.getChildren().addAll(messageLabel, okButton);
+
+        // Set the scene and show the popup
+        popupStage.setScene(new Scene(layout, 300, 150));
+        popupStage.showAndWait();
+    }
+    
+    private void showAppPasswordInstructions() {
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("App Password Instructions");
+
+        // Create a Label for the instructions
+        javafx.scene.control.Label instructionsLabel = new javafx.scene.control.Label(
+            "To generate an App Password for Gmail:\n\n" +
+            "1. Sign in to your Google Account\n" +
+            "2. Select 'App passwords' (you may need to enable 2-Step Verification first)\n" +
+            "3. At the bottom, choose 'Select app' and pick 'Mail'\n" +
+            "4. Choose 'Select device' and pick 'Other'\n" +
+            "5. Enter 'SMTP Email Sender' and click 'Generate'\n" +
+            "6. Use the 16-character password Google provides in the App Password field\n" +
+            "7. Click 'Done'"
+        );
+        instructionsLabel.setWrapText(true);
+
+        // Create the "OK" button
+        javafx.scene.control.Button okButton = new javafx.scene.control.Button("OK");
+        okButton.setOnAction(event -> popupStage.close());
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+        layout.getChildren().addAll(instructionsLabel, okButton);
+
+        // Set the scene and show the popup
+        popupStage.setScene(new Scene(layout, 400, 300));
+        popupStage.showAndWait();
+    }
+
+    private final String CONFIG_PATH = System.getProperty("user.home") + "/.smtp_login.env";
+
+    private void saveCredentials(String email, String password, boolean remember) {
+        Properties props = new Properties();
+        props.setProperty("EMAIL", email);
+        props.setProperty("PASSWORD", password); // You can Base64-encode if needed
+        props.setProperty("REMEMBER", String.valueOf(remember));
+
+        try (FileWriter writer = new FileWriter(CONFIG_PATH)) {
+            props.store(writer, "SMTP Login Credentials");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void loadSavedCredentials() {
+        File file = new File(CONFIG_PATH);
+        if (file.exists()) {
+            Properties props = new Properties();
+            try (FileReader reader = new FileReader(CONFIG_PATH)) {
+                props.load(reader);
+                
+                String email = props.getProperty("EMAIL", "");
+                String password = props.getProperty("PASSWORD", "");
+                boolean remember = Boolean.parseBoolean(props.getProperty("REMEMBER", "false"));
+                
+                emailField.setText(email);
+                passwordField.setText(password);
+                rememberMeCheckBox.setSelected(remember);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private void clearSavedCredentials() {
+        File file = new File(CONFIG_PATH);
+        if (file.exists()) {
+            file.delete();
+        }
     }
 }
