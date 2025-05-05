@@ -48,6 +48,13 @@ public class LoginController {
     private void initialize() {
         // Load saved credentials if available
         loadSavedCredentials();
+
+        // Add listener to clear credentials when "Remember Me" is unchecked
+        rememberMeCheckBox.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+            if (!isNowSelected) {
+                clearSavedCredentials();
+            }
+        });
     }
     
     @FXML
