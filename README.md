@@ -66,9 +66,9 @@ git clone https://github.com/KhoiNguyenVGU/smtp.git
 
 ### 2. Run with .exe file
 - Find your jdk-23 folder: `C:\Program Files\Java\jdk-23`
-- Find your javafx-sdk folder: `C:\Users\Khoi Nguyen\OneDrive - student.vgu.edu.vn\Documents\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1`
-- Copy your `javafx-sdk-23.0.1` folder in your `jdk-23` folder
-- Copy your new `jdk-23` folder to the recently-cloned `smtp` folder
+- Find your javafx-sdk folder: `C:\...\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1`
+- Copy your `javafx-sdk-23.0.1` folder into your `jdk-23` folder
+- Copy your new `jdk-23` folder into the recently-cloned `smtp` folder
 - Click on the `SMTP.exe` file to run the app
 
 
