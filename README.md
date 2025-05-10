@@ -58,8 +58,8 @@ git clone https://github.com/KhoiNguyenVGU/smtp.git
     "name": "MainApp",
     "request": "launch",
     "mainClass": "gui.MainApp",
-    "projectName": "smtp_16e1b185",
-    "vmArgs": "--module-path \"C:/Users/Khoi Nguyen/OneDrive - student.vgu.edu.vn/Documents/openjfx-23.0.1_windows-x64_bin-sdk/javafx-sdk-23.0.1/lib\" --add-modules javafx.controls,javafx.fxml"
+    "projectName": <your_project_name>,
+    "vmArgs": "--module-path \"C:/.../openjfx-23.0.1_windows-x64_bin-sdk/javafx-sdk-23.0.1/lib\" --add-modules javafx.controls,javafx.fxml"
 },
 ```
 - Save your `launch.json`
