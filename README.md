@@ -35,9 +35,8 @@ git clone https://github.com/KhoiNguyenVGU/smtp.git
 - Open `src\gui\MainApp.java`
 - In the bottom left corner, you should now see `Java Projects`, click it
 - Scroll down to the bottom and find `Referenced Libraries`, click on the `+` sign next to it
-- Add javafx libraries located at `openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib`
-- Run `MainApp.java`, it will produce an error but we still do it on purpose
-- Open `.vscode\launch.json`
+- Add javafx libraries located at `C:\...\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib`
+- Go to `Run` -> `Add Configuration` and open `.vscode\launch.json`
 - Locate this section:
 ```
 {
@@ -63,7 +62,7 @@ git clone https://github.com/KhoiNguyenVGU/smtp.git
 },
 ```
 - Save your `launch.json`
-- Run MainApp.java again and it should now work
+- Run MainApp.java
 
 ### 2. Run with .exe file
 - Find your jdk-23 folder: `C:\Program Files\Java\jdk-23`
@@ -80,7 +79,7 @@ git clone https://github.com/KhoiNguyenVGU/smtp.git
 - **Email Content:**  
   Fill in recipients (comma separated), subject, and content. Attach files if needed.
 - **Schedule Email:**  
-  Check "Schedule Email" and enter the date/time in `yyyy-MM-dd HH:mm:ss` format.
+  Check "Schedule Email" and enter the date/time to schedule Email.
   - **Send:**  
   Click "Send" to send your Email.
 - **Logout:**  
