@@ -1,14 +1,18 @@
 package gui;
 
+import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Modality;
+import javafx.util.Duration;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -29,33 +33,43 @@ public class LoginController {
     private PasswordField passwordField;
 
     @FXML
+    private Button loginButton;
+
+    @FXML
     private void handleLogin() {
         String email = emailField.getText();
         String password = passwordField.getText();
 
-        // Create and show the "Logging in..." popup
-        Stage loggingInPopup = createLoggingInPopup();
-        loggingInPopup.show();
+        // Create a ProgressIndicator to replace the button text
+        ProgressIndicator spinner = new ProgressIndicator();
+        spinner.setProgress(-1.0); // Indeterminate mode
+        spinner.setMaxSize(20, 20); // Set the size of the spinner
+        spinner.setStyle("-fx-progress-color:rgb(255, 255, 255);");
+
+        // Show the spinner and disable the login button
+        Platform.runLater(() -> {
+            loginButton.setGraphic(spinner); // Add the spinner as the button's graphic
+            loginButton.setText(""); // Clear the button text
+            loginButton.setDisable(true); // Disable the button
+        });
 
         // Run the login process in a background thread
         new Thread(() -> {
             boolean isValid = validateCredentials(email, password);
 
-            // Close the "Logging in..." popup on the JavaFX Application Thread
-            Platform.runLater(loggingInPopup::close);
+            // Restore the button text and re-enable the button on the JavaFX Application Thread
+            Platform.runLater(() -> {
+                loginButton.setGraphic(null); // Remove the spinner
+                loginButton.setText("Login"); // Restore the button text
+                loginButton.setDisable(false); // Re-enable the button
+            });
 
             if (isValid) {
                 Platform.runLater(() -> {
                     try {
-                        // Load the main view
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/SMTPView.fxml"));
                         Stage stage = (Stage) emailField.getScene().getWindow();
                         stage.setScene(new Scene(loader.load()));
-
-                        // Pass the email and password to the main controller
-                        SMTPController controller = loader.getController();
-                        controller.setUserCredentials(email, password);
-
                         stage.setTitle("SMTP Email Sender");
                         stage.show();
                     } catch (Exception e) {
@@ -63,10 +77,17 @@ public class LoginController {
                     }
                 });
             } else {
-                // Show an error popup for invalid credentials
                 Platform.runLater(() -> showErrorPopup("Invalid Credentials", "The provided email or app password is incorrect."));
             }
         }).start();
+    }
+
+    private RotateTransition startButtonSpin() {
+        RotateTransition rotateTransition = new RotateTransition(Duration.seconds(1), loginButton);
+        rotateTransition.setByAngle(360); // Rotate 360 degrees
+        rotateTransition.setCycleCount(RotateTransition.INDEFINITE); // Keep spinning
+        rotateTransition.play();
+        return rotateTransition;
     }
 
     private boolean validateCredentials(String email, String password) {

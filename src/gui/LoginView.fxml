@@ -1,22 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="gui.LoginController" prefHeight="300" prefWidth="400">
+<AnchorPane prefHeight="300" prefWidth="400" stylesheets="@styles.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="gui.LoginController">
     <children>
-        <!-- Title -->
-        <Label text="Login to SMTP Email Sender" layoutX="50" layoutY="20" style="-fx-font-size: 18;"/>
+        <VBox alignment="CENTER" layoutX="20.0" layoutY="20.0" spacing="15" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+            <!-- Title -->
+            <Label styleClass="title-label" text="Login to SMTP Email Sender" />
 
-        <!-- Email Field -->
-        <Label text="Email:" layoutX="50" layoutY="80"/>
-        <TextField fx:id="emailField" layoutX="150" layoutY="80" prefWidth="200"/>
+            <!-- Email Field -->
+            <HBox alignment="CENTER" prefHeight="34.0" prefWidth="313.0" spacing="10">
+                <GridPane hgap="10" prefHeight="34.0" prefWidth="294.0" vgap="10">
+                    <!-- First Column: Email Label -->
+                    <Label prefHeight="16.0" prefWidth="93.0" styleClass="form-label" text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <!-- Second Column: Email TextField -->
+                    <TextField fx:id="emailField" prefHeight="34.0" prefWidth="194.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                    </rowConstraints>
+                </GridPane>
+            </HBox>
 
-        <!-- Password Field -->
-        <Label text="App Password:" layoutX="50" layoutY="120"/>
-        <PasswordField fx:id="passwordField" layoutX="150" layoutY="120" prefWidth="200"/>
+            <!-- Password Field -->
+            <HBox alignment="CENTER" spacing="10">
+                <GridPane hgap="10" vgap="10">
+                    <!-- First Column: Password Label -->
+                    <Label styleClass="form-label" text="App Password:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <!-- Second Column: Password TextField -->
+                    <PasswordField fx:id="passwordField" prefHeight="34.0" prefWidth="192.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                    </rowConstraints>
+                </GridPane>
+            </HBox>
 
-        <!-- Login Button -->
-        <Button text="Login" layoutX="150" layoutY="180" onAction="#handleLogin"/>
+            <!-- Login Button -->
+            <Button fx:id="loginButton" onAction="#handleLogin" styleClass="login-button" text="Login" />
+        </VBox>
     </children>
 </AnchorPane>

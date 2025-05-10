@@ -1,0 +1,87 @@
+/* General styles for the AnchorPane */
+.root {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #e6f7ff); /* Light gradient */
+    -fx-padding: 20;
+}
+
+/* Title Label */
+.label {
+    -fx-font-family: "Times New Roman";
+    -fx-text-fill: #333;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* Title Label */
+.title-label {
+    -fx-font-size: 25px; /* Larger font size */
+    -fx-font-weight: bold;
+    -fx-text-fill: #0b64a9; /* Vibrant blue color */
+    -fx-padding: 10 0;
+    -fx-effect: dropshadow(gaussian, rgba(123, 122, 122, 0.3), 5, 0, 2, 2); /* Lifting shadow effect */
+    -fx-alignment: center; /* Center the title */
+}
+
+.label:first-of-type {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2a9df4;
+}
+
+/* TextField and PasswordField */
+.text-field, .password-field {
+    -fx-border-color: #ccc;
+    -fx-border-radius: 10; /* Rounded corners */
+    -fx-background-radius: 10; /* Rounded corners */
+    -fx-padding: 8; /* Add padding inside the fields */
+    -fx-font-size: 14px;
+    -fx-background-color: #f9f9f9; /* Light background */
+}
+
+/* Smooth transition for hover effects */
+.text-field, .password-field, .login-button {
+    -fx-transition: all 0.3s ease-in-out;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #0b64a9; /* Highlight border on focus */
+    -fx-border-width: 2; /* Thicker border on focus */
+}
+
+/* Button */
+.button {
+    -fx-background-color: #2a9df4;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 5 10;
+}
+
+.button:hover {
+    -fx-background-color: #1e7dc1;
+}
+
+/* Login Button */
+.login-button {
+    -fx-background-color: linear-gradient(to bottom, #2a9df4, #1e7dc1); /* Gradient background */
+    -fx-text-fill: white; /* White text */
+    -fx-font-size: 16px; /* Slightly larger font */
+    -fx-font-weight: bold;
+    -fx-border-radius: 10; /* Rounded corners */
+    -fx-background-radius: 10; /* Rounded corners */
+    -fx-padding: 10 20; /* Add padding */
+    -fx-cursor: hand; /* Change cursor to pointer */
+}
+
+.login-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #1e7dc1, #2a9df4); /* Reverse gradient on hover */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 2, 2); /* Add shadow on hover */
+}
+
+.login-button:disabled {
+    -fx-background-color: #2a9df4; /* Gray background when disabled */
+    -fx-text-fill: #2a9df4; /* Dimmed text */
+    -fx-opacity: 0.9; /* Slightly transparent */
+}
