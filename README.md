@@ -5,7 +5,7 @@ A JavaFX desktop application for sending emails via Gmail's SMTP server
 ## Features
 
 - **Login with Gmail** (App Password required)
-- **Send emails** to one or more recipients (comma separated)
+- **Send emails** to one or more recipients
 - **Attach files** to your emails
 - **Schedule emails** to be sent at a specific time
 - **Retry logic** for failed sends
@@ -21,9 +21,9 @@ A JavaFX desktop application for sending emails via Gmail's SMTP server
 
 ## Run the application
 
-- Prepare a new empty folder
+- Prepare a new empty directory
 - Open Visual Studio Code
-- Go to `File` -> `Open Folder` to open that folder
+- Go to `File` -> `Open Folder` to open that directory
 - Open your terminal and enter: 
 ```
 git clone https://github.com/KhoiNguyenVGU/smtp.git
