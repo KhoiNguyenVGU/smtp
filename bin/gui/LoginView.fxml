@@ -18,5 +18,12 @@
 
         <!-- Login Button -->
         <Button text="Login" layoutX="150" layoutY="180" onAction="#handleLogin"/>
+        
+        <!-- Remember Me Checkbox -->
+        <CheckBox fx:id="rememberMeCheckBox" layoutX="150" layoutY="160" text="Remember Me"/>
+
+        <!-- Forgot Password Link -->
+        <Hyperlink fx:id="forgotPasswordLink" text="Forgot Password?" layoutX="150" layoutY="210" 
+                   onAction="#handleForgotPassword"/>
     </children>
 </AnchorPane>
