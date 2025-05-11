@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="gui.SMTPController" prefHeight="600" prefWidth="600">
+<AnchorPane prefHeight="600" prefWidth="600" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.SMTPController">
     <children>
         <!-- Title -->
-        <Label text="SMTP Email Sender" layoutX="20" layoutY="20">
-            <font>
-                <Font size="24"/>
-            </font>
-        </Label>
-        
+        <Label layoutX="19.0" layoutY="9.0" styleClass="title-label" text="SMTP Email Sender" />
+
         <!-- Logout Button -->
-        <Button text="Logout" layoutX="500" layoutY="20" onAction="#handleLogout"/>
-        
+        <Button layoutX="500.0" layoutY="20.0" onAction="#handleLogout" styleClass="button" text="Logout" />
+
         <!-- Recipients -->
-        <Label text="Recipients (comma separated):" layoutX="20" layoutY="60"/>
-        <TextField fx:id="recipientsField" layoutX="220" layoutY="60" prefWidth="330"/>
-        
+        <Label layoutX="21.0" layoutY="92.0" prefWidth="200" text="Recipients (comma separated):" wrapText="true" />
+        <TextField fx:id="recipientsField" layoutX="220.0" layoutY="92.0" prefWidth="330" styleClass="text-field" />
+
         <!-- Subject -->
-        <Label text="Subject:" layoutX="20" layoutY="100"/>
-        <TextField fx:id="subjectField" layoutX="150" layoutY="100" prefWidth="400"/>
-        
+        <Label layoutX="21.0" layoutY="148.0" text="Subject:" />
+        <TextField fx:id="subjectField" layoutX="220.0" layoutY="148.0" prefWidth="330" styleClass="text-field" />
+
         <!-- Email Content -->
-        <Label text="Email Content:" layoutX="20" layoutY="140"/>
-        <TextArea fx:id="contentArea" layoutX="150" layoutY="140" prefWidth="400" prefHeight="100"/>
-        
+        <Label layoutX="21.0" layoutY="205.0" text="Email Content:" />
+        <TextArea fx:id="contentArea" layoutX="220.0" layoutY="205.0" prefHeight="150" prefWidth="330" styleClass="text-field" />
+
         <!-- Attach Files Button -->
-        <Button text="Attach Files" layoutX="150" layoutY="260" onAction="#handleAttachFiles"/>
-        
+        <Button layoutX="220.0" layoutY="371.0" onAction="#handleAttachFiles" styleClass="button" text="Attach Files" />
+
         <!-- Attached Files Section -->
-        <Label text="Attached Files:" layoutX="20" layoutY="300"/>
-        <ListView fx:id="attachedFilesListView" layoutX="150" layoutY="300" prefWidth="400" prefHeight="100"/>
-        
+        <Label layoutX="22.0" layoutY="418.0" text="Attached Files:" />
+        <ListView fx:id="attachedFilesListView" layoutX="220.0" layoutY="418.0" prefHeight="100" prefWidth="330" styleClass="text-field" />
+
         <!-- Schedule Email Section -->
-        <CheckBox text="Schedule Email" layoutX="20" layoutY="420" fx:id="scheduleCheckBox"/>
-        <Label text="Schedule Time (yyyy-MM-dd HH:mm:ss):" layoutX="20" layoutY="460" fx:id="scheduleTimeLabel" visible="false"/>
-        <TextField fx:id="scheduleTimeField" layoutX="250" layoutY="460" prefWidth="300" visible="false"/>
-        
+        <CheckBox fx:id="scheduleCheckBox" layoutX="19.0" layoutY="529.0" styleClass="label" text="Schedule Email" />
+        <Label fx:id="scheduleTimeLabel" layoutX="20" layoutY="560" prefHeight="46.0" prefWidth="169.0" styleClass="form-label" text="Schedule Time (yyyy-MM-dd HH:mm:ss):" visible="false" wrapText="true" />
+        <TextField fx:id="scheduleTimeField" layoutX="221.0" layoutY="564.0" prefHeight="38.0" prefWidth="330.0" styleClass="text-field" visible="false" />
+
         <!-- Send Email Button -->
-        <Button text="Send Email" layoutX="150" layoutY="500" onAction="#handleSendEmail"/>
+        <Button layoutX="242.0" layoutY="627.0" onAction="#handleSendEmail" styleClass="login-button" text="Send Email" />
     </children>
 </AnchorPane>
