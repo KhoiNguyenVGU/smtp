@@ -10,9 +10,18 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resources/LoginView.fxml"));
-        primaryStage.setScene(new Scene(loader.load()));
+        Scene scene = new Scene(loader.load());
+
+        primaryStage.setScene(scene);
         primaryStage.setTitle("Login - SMTP Email Sender");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
+
+        // Start the application maximized but not in full screen
+        primaryStage.setMaximized(true);
+
+        // Allow resizing
+        primaryStage.setResizable(true);
+
         primaryStage.show();
     }
 
