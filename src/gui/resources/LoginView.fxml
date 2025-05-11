@@ -59,8 +59,11 @@
             <!-- Remember Me Checkbox -->
             <CheckBox fx:id="rememberMeCheckBox" prefHeight="40.0" prefWidth="200.0" styleClass="form-label" text="Remember Me" />
 
-            <!-- Forgot Password Link -->
-            <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPassword" prefHeight="40.0" prefWidth="200.0" styleClass="forgot-password" text="Forgot Password?" />
+            <!-- Forgot Password and How to Create App Password Links -->
+            <HBox alignment="CENTER" spacing="20">
+                <Hyperlink fx:id="howToAppPasswordLink" onAction="#handleHowToAppPassword" prefHeight="40.0" prefWidth="250.0" styleClass="forgot-password" text="How to create app password?" />
+                <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPassword" prefHeight="40.0" prefWidth="200.0" styleClass="forgot-password" text="Forgot Password?" />
+            </HBox>
         </VBox>
     </children>
 </AnchorPane>
