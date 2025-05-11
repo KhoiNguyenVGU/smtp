@@ -24,11 +24,11 @@
                 <GridPane hgap="20" vgap="20">
                     <children>
                         <Label prefHeight="50.0" prefWidth="200.0" styleClass="form-label" text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                        <TextField fx:id="emailField" prefHeight="50.0" prefWidth="400.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <TextField fx:id="emailField" prefHeight="50.0" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                     </children>
                     <columnConstraints>
                         <ColumnConstraints prefWidth="200.0" />
-                        <ColumnConstraints prefWidth="400.0" />
+                        <ColumnConstraints prefWidth="250.0" />
                     </columnConstraints>
                <rowConstraints>
                   <RowConstraints />
@@ -41,11 +41,11 @@
                 <GridPane hgap="20" vgap="20">
                     <children>
                         <Label prefHeight="50.0" prefWidth="200.0" styleClass="form-label" text="App Password:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                        <PasswordField fx:id="passwordField" prefHeight="50.0" prefWidth="400.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <PasswordField fx:id="passwordField" prefHeight="50.0" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                     </children>
                     <columnConstraints>
                         <ColumnConstraints prefWidth="200.0" />
-                        <ColumnConstraints prefWidth="400.0" />
+                        <ColumnConstraints prefWidth="250.0" />
                     </columnConstraints>
                <rowConstraints>
                   <RowConstraints />
