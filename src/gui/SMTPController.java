@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -28,7 +29,6 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 public class SMTPController {
@@ -256,6 +256,7 @@ public class SMTPController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Sending Email");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a VBox layout for dynamic updates
         VBox layout = new VBox(10);
@@ -279,6 +280,7 @@ public class SMTPController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Email Sent Successfully");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the success message
         Label successLabel = new Label("The email was sent successfully!");
@@ -322,6 +324,7 @@ public class SMTPController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Email Sending Failed");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the failure message
         Label failureLabel = new Label("All attempts to send the email have failed.");
@@ -356,6 +359,7 @@ public class SMTPController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Invalid Credentials");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the error message
         Label errorLabel = new Label("The provided username or password is incorrect.");
@@ -390,6 +394,7 @@ public class SMTPController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Invalid Recipient");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the error message
         Label errorLabel = new Label("The recipient address is invalid:\n" + errorMessage);
@@ -414,6 +419,7 @@ public class SMTPController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Empty Subject");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the confirmation message
         Label confirmationLabel = new Label("The subject field is empty. Do you want to send the email without a subject?");
@@ -584,6 +590,7 @@ public class SMTPController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Invalid Scheduled Time");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the error message
         Label errorLabel = new Label("The scheduled time is in the past. Please select a valid future time.");
@@ -608,6 +615,7 @@ public class SMTPController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle(title);
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the error message
         Label errorLabel = new Label(message);
@@ -635,6 +643,7 @@ public class SMTPController {
         scheduledPopupStage = new Stage(); // Store the popup stage reference
         scheduledPopupStage.initModality(Modality.APPLICATION_MODAL);
         scheduledPopupStage.setTitle("Email Scheduled");
+        scheduledPopupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         Label scheduledLabel = new Label("The email is scheduled to be sent at: " + scheduledTime);
 
@@ -658,7 +667,7 @@ public class SMTPController {
     private void handleLogout() {
         try {
             // Load the login view
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/LoginView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resources/LoginView.fxml"));
             Stage stage = (Stage) recipientsField.getScene().getWindow();
             stage.setScene(new Scene(loader.load()));
 

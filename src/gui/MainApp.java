@@ -9,10 +9,10 @@ import javafx.stage.Stage;
 public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/LoginView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resources/LoginView.fxml"));
         primaryStage.setScene(new Scene(loader.load()));
         primaryStage.setTitle("Login - SMTP Email Sender");
-        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/logo.png")));
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
         primaryStage.show();
     }
 

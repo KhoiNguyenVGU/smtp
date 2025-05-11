@@ -8,6 +8,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -143,7 +144,7 @@ public class LoginController {
 
                 Platform.runLater(() -> {
                     try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/SMTPView.fxml"));
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/resources/SMTPView.fxml"));
                         Scene smtpScene = new Scene(loader.load());
                         SMTPController smtpController = loader.getController();
                         smtpController.setUserCredentials(email, password); // Pass credentials here
@@ -245,6 +246,7 @@ public class LoginController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("Logging In");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the "Logging in..." message
         javafx.scene.control.Label loggingInLabel = new javafx.scene.control.Label("Logging in... Please wait.");
@@ -263,6 +265,7 @@ public class LoginController {
     private void showErrorPopup(String title, String message) {
         Stage popupStage = new Stage();
         popupStage.setTitle(title);
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the error message
         javafx.scene.control.Label errorLabel = new javafx.scene.control.Label(message);
@@ -300,6 +303,7 @@ public class LoginController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle(title);
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the message
         javafx.scene.control.Label messageLabel = new javafx.scene.control.Label(message);
@@ -323,6 +327,7 @@ public class LoginController {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.setTitle("App Password Instructions");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the instructions
         javafx.scene.control.Label instructionsLabel = new javafx.scene.control.Label(
