@@ -102,6 +102,12 @@ public class SMTPController {
     }
 
     @FXML
+    private void handleClearAttachments() {
+        attachedFiles.clear();
+        attachedFilesListView.getItems().clear();
+    }
+
+    @FXML
     private void handleSendEmail() {
         if (recipientsField.getText().trim().isEmpty()) {
             showInvalidRecipientPopup("Recipient field cannot be empty.");
@@ -210,7 +216,7 @@ public class SMTPController {
                         System.out.println("Failed to send email. Error: " + e.getMessage());
                         if (attempt < MAX_RETRIES) {
                             int currentAttempt = attempt;
-                            javafx.application.Platform.runLater(() -> sendingLabel.setText("Attempt " + currentAttempt + " failed. Retrying in 1 minute..."));
+                            javafx.application.Platform.runLater(() -> sendingLabel.setText("Attempt " + currentAttempt + "/3 failed. Retrying in 1 minute..."));
                             System.out.println("Retrying in 1 minute...");
                             TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
                         } else {

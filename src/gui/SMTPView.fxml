@@ -30,6 +30,7 @@
 
         <!-- Attach Files Button -->
         <Button layoutX="220.0" layoutY="371.0" onAction="#handleAttachFiles" styleClass="button" text="Attach Files" />
+        <Button layoutX="350.0" layoutY="371.0" onAction="#handleClearAttachments" styleClass="button" text="Clear Attachments" />
 
         <!-- Attached Files Section -->
         <Label layoutX="22.0" layoutY="418.0" text="Attached Files:" />

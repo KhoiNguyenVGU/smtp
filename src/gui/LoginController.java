@@ -144,8 +144,12 @@ public class LoginController {
                 Platform.runLater(() -> {
                     try {
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/SMTPView.fxml"));
+                        Scene smtpScene = new Scene(loader.load());
+                        SMTPController smtpController = loader.getController();
+                        smtpController.setUserCredentials(email, password); // Pass credentials here
+
                         Stage stage = (Stage) emailField.getScene().getWindow();
-                        stage.setScene(new Scene(loader.load()));
+                        stage.setScene(smtpScene);
                         stage.setTitle("SMTP Email Sender");
                         stage.show();
                     } catch (Exception e) {
