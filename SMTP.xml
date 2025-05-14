@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>C:\Users\Khoi Nguyen\OneDrive - student.vgu.edu.vn\Desktop\VGU\Academic Year 2\Computer Networks 2\Project\test_2\smtp\SMTP.jar</jar>
+  <outfile>C:\Users\Khoi Nguyen\OneDrive - student.vgu.edu.vn\Desktop\VGU\Academic Year 2\Computer Networks 2\Project\test_2\smtp\SMTP.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl></downloadUrl>
+  <supportUrl></supportUrl>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest></manifest>
+  <icon>C:\Users\Khoi Nguyen\Downloads\logo.ico</icon>
+  <jre>
+    <path>jdk-23</path>
+    <requiresJdk>false</requiresJdk>
+    <requires64Bit>false</requires64Bit>
+    <minVersion></minVersion>
+    <maxVersion></maxVersion>
+    <opt>--module-path &quot;jdk-23\javafx-sdk-23.0.1\lib&quot; --add-modules javafx.controls,javafx.fxml</opt>
+  </jre>
+</launch4jConfig>

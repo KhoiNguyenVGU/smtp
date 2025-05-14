@@ -645,7 +645,12 @@ public class SMTPController {
         scheduledPopupStage.setTitle("Email Scheduled");
         scheduledPopupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
-        Label scheduledLabel = new Label("The email is scheduled to be sent at: " + scheduledTime);
+        Label infoLabel = new Label("The email is scheduled to be sent at:");
+        Label timeLabel = new Label(scheduledTime);
+        timeLabel.setStyle("-fx-alignment: center;");
+
+        VBox labelBox = new VBox(2, infoLabel, timeLabel);
+        labelBox.setStyle("-fx-alignment: center;");
 
         Button cancelButton = new Button("Cancel");
         cancelButton.setOnAction(event -> {
@@ -655,7 +660,7 @@ public class SMTPController {
         });
 
         VBox layout = new VBox(10);
-        layout.getChildren().addAll(scheduledLabel, cancelButton);
+        layout.getChildren().addAll(labelBox, cancelButton);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
 
         Scene scene = new Scene(layout, 300, 150);
