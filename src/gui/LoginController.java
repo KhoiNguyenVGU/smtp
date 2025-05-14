@@ -61,6 +61,21 @@ public class LoginController {
             }
         });
     }
+
+    @FXML
+    private void handleHowToAppPassword() {
+        try {
+            // Open the Google App Password creation page
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI("https://myaccount.google.com/apppasswords"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showInfoPopup("Error", "Could not open browser. Please visit the app password page manually.");
+        }
+        // Show instructions popup
+        showAppPasswordInstructions();
+    }
     
     @FXML
     private void handleForgotPassword() {
@@ -78,7 +93,7 @@ public class LoginController {
                 Desktop.getDesktop().browse(new URI("https://myaccount.google.com/apppasswords"));
                 
                 // Show instructions popup
-                showAppPasswordInstructions();
+                showResetAppPasswordInstructions();
             } else {
                 showInfoPopup("Browser Unavailable", 
                     "Could not open browser automatically. Please visit https://myaccount.google.com/apppasswords");
@@ -328,22 +343,54 @@ public class LoginController {
         popupStage.setScene(new Scene(layout, 300, 150));
         popupStage.showAndWait();
     }
-    
+
     private void showAppPasswordInstructions() {
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
-        popupStage.setTitle("App Password Instructions");
+        popupStage.setTitle("Create App Password Instructions");
         popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
         // Create a Label for the instructions
         javafx.scene.control.Label instructionsLabel = new javafx.scene.control.Label(
-            "To generate an App Password for Gmail:\n\n" +
-            "1. Sign in to your Google Account\n" +
-            "2. Select 'App passwords' (you may need to enable 2-Step Verification first)\n" +
-            "3. At the bottom, choose 'Select app' and pick 'Mail'\n" +
-            "4. Choose 'Select device' and pick 'Other'\n" +
-            "5. Enter 'SMTP Email Sender' and click 'Generate'\n" +
-            "6. Use the 16-character password Google provides in the App Password field\n" +
+            "1. First, make sure that you have 2-Factor Authentication enabled\n" +
+            "2. Direct to your browser, a new tab has just appeared\n" +
+            "3. Sign in to your Google Account\n" +
+            "4. Enter a name for your new App Password\n" +
+            "5. Click 'Create'\n" +
+            "6. Save this App Password for future usage\n" +
+            "7. Click 'Done'"
+        );
+        instructionsLabel.setWrapText(true);
+
+        // Create the "OK" button
+        javafx.scene.control.Button okButton = new javafx.scene.control.Button("OK");
+        okButton.setOnAction(event -> popupStage.close());
+
+        // Arrange the components in a VBox
+        VBox layout = new VBox(10);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+        layout.getChildren().addAll(instructionsLabel, okButton);
+
+        // Set the scene and show the popup
+        popupStage.setScene(new Scene(layout, 400, 300));
+        popupStage.showAndWait();
+    }
+    
+    private void showResetAppPasswordInstructions() {
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Reset App Password Instructions");
+        popupStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
+
+        // Create a Label for the instructions
+        javafx.scene.control.Label instructionsLabel = new javafx.scene.control.Label(
+            "To reset your App Password:\n\n" +
+            "1. Direct to your browser, a new tab has just appeared\n" +
+            "2. Sign in to your Google Account\n" +
+            "3. Delete your previous App Password\n" +
+            "4. Enter a name for your new App Password\n" +
+            "5. Click 'Create'\n" +
+            "6. Save this App Password for future usage\n" +
             "7. Click 'Done'"
         );
         instructionsLabel.setWrapText(true);
