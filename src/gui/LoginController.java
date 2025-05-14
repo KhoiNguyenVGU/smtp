@@ -152,6 +152,12 @@ public class LoginController {
                         Stage stage = (Stage) emailField.getScene().getWindow();
                         stage.setScene(smtpScene);
                         stage.setTitle("SMTP Email Sender");
+
+                        // Set the window size to fit your laptop screen
+                        stage.setWidth(1920);
+                        stage.setHeight(1080);
+                        stage.setMaximized(true); // Optional: maximize the window
+
                         stage.show();
                     } catch (Exception e) {
                         e.printStackTrace();

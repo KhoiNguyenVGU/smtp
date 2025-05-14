@@ -14,6 +14,15 @@
     -fx-alignment: center; /* Center the title */
 }
 
+.smtp-title-label {
+    -fx-font-size: 40px; /* Larger font size for the title */
+    -fx-font-weight: bold;
+    -fx-text-fill: #0b64a9; /* Vibrant blue color */
+    -fx-padding: 20 0; /* Increased padding */
+    -fx-effect: dropshadow(gaussian, rgba(123, 122, 122, 0.3), 10, 0, 4, 4); /* Larger shadow effect */
+    -fx-alignment: center; /* Center the title */
+}
+
 /* Form Labels */
 .form-label {
     -fx-font-size: 24px; /* Font size for form labels */
