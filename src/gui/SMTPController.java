@@ -673,6 +673,13 @@ public class SMTPController {
 
             // Reset the stage title
             stage.setTitle("Login - SMTP Email Sender");
+
+            // Start the application maximized but not in full screen
+            stage.setMaximized(true);
+
+            // Allow resizing
+            stage.setResizable(true);
+
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
