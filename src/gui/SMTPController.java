@@ -191,7 +191,7 @@ public class SMTPController {
                         attempt++;
                         int currentAttempt = attempt;
                         javafx.application.Platform.runLater(() -> sendingLabel.setText("Attempt " + currentAttempt + ": Sending in process... Please wait."));
-                        System.out.println("Attempt " + attempt + " to send the email...");
+                        System.out.println("Attempt " + attempt + "/3 to send the email...");
                         // Call sendEmail and retrieve the SMTP session resources
                         smtpResources = sendEmailAndGetResources(username, password, recipients, subject, content, attachedFiles);
                         success[0] = true; // Update the success value
