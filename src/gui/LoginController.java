@@ -171,7 +171,7 @@ public class LoginController {
                         // Set the window size to fit your laptop screen
                         stage.setWidth(1920);
                         stage.setHeight(1080);
-                        stage.setMaximized(true); // Optional: maximize the window
+                        stage.setMaximized(true);
 
                         stage.show();
                     } catch (Exception e) {
@@ -192,7 +192,7 @@ public class LoginController {
         return rotateTransition;
     }
 
-    // Add this method to check for internet connectivity
+    // Check for internet connectivity
     private boolean isInternetAvailable() {
         try (Socket socket = new Socket()) {
             socket.connect(new java.net.InetSocketAddress("8.8.8.8", 53), 1500);
@@ -206,7 +206,7 @@ public class LoginController {
         try {
             // Connect to the SMTP server
             String SMTP_SERVER = "smtp.gmail.com";
-            int SMTP_PORT = 587;
+            int SMTP_PORT = 587; // 587 instead of 25
 
             // Create a socket connection
             Socket socket = new Socket(SMTP_SERVER, SMTP_PORT);

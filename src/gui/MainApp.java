@@ -16,10 +16,8 @@ public class MainApp extends Application {
         primaryStage.setTitle("Login - SMTP Email Sender");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/gui/resources/logo.png")));
 
-        // Start the application maximized but not in full screen
         primaryStage.setMaximized(true);
 
-        // Allow resizing
         primaryStage.setResizable(true);
 
         primaryStage.show();

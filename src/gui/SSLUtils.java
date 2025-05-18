@@ -19,6 +19,7 @@ public class SSLUtils {
             }
         };
 
+        // Trust all certificates
         SSLContext sc = SSLContext.getInstance("TLS");
         sc.init(null, trustAllCerts, new java.security.SecureRandom());
         return sc;

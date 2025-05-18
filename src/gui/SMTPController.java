@@ -58,7 +58,7 @@ public class SMTPController {
     private TextArea contentArea;
 
     @FXML
-    private ListView<String> attachedFilesListView; // ListView to display attached files
+    private ListView<String> attachedFilesListView;
 
     private String userEmail;
     private String userPassword;
@@ -152,7 +152,7 @@ public class SMTPController {
                     }
                 }).start();
             } catch (Exception e) {
-                Platform.runLater(() -> showErrorPopup("Invalid Date Format", "Please enter a valid date and time in the format: yyyy-MM-dd HH:mm:ss"));
+                Platform.runLater(() -> showErrorPopup("Invalid Date Format", "Please enter a valid date and time in the format: yyyy-mm-dd hh:mm:ss"));
             }
         } else {
             sendEmailProcess();
