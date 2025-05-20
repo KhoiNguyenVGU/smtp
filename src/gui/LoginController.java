@@ -119,12 +119,6 @@ public class LoginController {
             return;
         }
 
-        // Check for internet connection before proceeding
-        if (!isInternetAvailable()) {
-            showErrorPopup("No Internet Connection", "Please check your internet connection and try again.");
-            return;
-        }
-
         // Create a ProgressIndicator to replace the button text
         ProgressIndicator spinner = new ProgressIndicator();
         spinner.setProgress(-1.0); // Indeterminate mode
