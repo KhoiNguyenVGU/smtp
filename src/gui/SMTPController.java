@@ -500,7 +500,7 @@ public class SMTPController {
 
         // DATA command
         String dataResponse = sendCommand(tlsWriter, tlsReader, "DATA");
-        if (!dataResponse.startsWith("354")) {
+        if (!dataResponse.startsWith("354")) { // 354: Sender and recipient OK, proceed to send data
             throw new Exception("Error during DATA command: " + dataResponse);
         }
 
@@ -544,7 +544,7 @@ public class SMTPController {
         System.out.println("Server: " + finalResponse);
 
         // Check for errors in the final response
-        if (!finalResponse.startsWith("250")) {
+        if (!finalResponse.startsWith("250")) { // 250: Sent successfully
             throw new Exception("Error after sending email: " + finalResponse);
         }
 

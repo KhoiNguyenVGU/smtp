@@ -231,7 +231,7 @@ public class LoginController {
             sendCommand(writer, reader, Base64.getEncoder().encodeToString(email.getBytes())); // Send encoded username
             String authResponse = sendCommand(writer, reader, Base64.getEncoder().encodeToString(password.getBytes())); // Send encoded password
 
-            // Check for authentication errors
+            // Check for authentication errors (535: Invalid credentials, 530: Authentication required)
             if (authResponse.startsWith("535") || authResponse.startsWith("530")) {
                 System.out.println("Invalid credentials: " + authResponse);
                 return false; // Invalid credentials
