@@ -1,16 +1,21 @@
-# SMTP Email Sender
+# SMTP Client Implementation
 
 A JavaFX desktop application for sending emails via Gmail's SMTP server
 
-## Features
+## Core Features
 
-- **Login with Gmail** (App Password required)
-- **Send emails** to one or more recipients
-- **Attach files** to your emails
-- **Schedule emails** to be sent at a specific time
-- **Retry logic** for failed sends
-- **Remember Me** option for login
-- **User-friendly popups** for errors and confirmations
+- **Login and Authentication**
+- **Send Email Process**
+- **QUIT Command**
+- **GUI Implementation**
+
+## Extra Features
+
+- **Multiple Recipients**
+- **File Attachments (with MIME)**
+- **Time Scheduling**
+- **Retry Mechanism (in case network fails, etc.)**
+- **Enhanced Security with SSL/TLS**
 
 ## Requirements
 
@@ -80,7 +85,7 @@ git clone https://github.com/KhoiNguyenVGU/smtp.git
   Fill in recipients (comma separated), subject, and content. Attach files if needed.
 - **Schedule Email:**  
   Check "Schedule Email" and enter the date/time to schedule Email.
-  - **Send:**  
+- **Send:**  
   Click "Send" to send your Email.
 - **Logout:**  
   Click "Logout" to return to the login screen.
@@ -94,11 +99,10 @@ git clone https://github.com/KhoiNguyenVGU/smtp.git
 
 ## Folder Structure
 
-- `.vscode` - Configuration files
 - `bin/` - Compiled output
-- `src/core/` - Terminal-based version code
-- `src/gui/` - GUI-based version code
-
+- `src/core/` - Terminal-based code
+- `src/gui/` - GUI-based code
+- `src/gui/resources` - Related resources for GUI
 
 ## License
 
